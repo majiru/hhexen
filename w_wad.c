@@ -301,8 +301,8 @@ void W_InitMultipleFiles(const char **filenames)
 
 static int IsMarker(const char *marker, const char *name)
 {
-	return !strncmp(name, marker, 8) ||
-		(*name == *marker && !strncmp(name + 1, marker, 7));
+	return !cistrncmp(name, marker, 8) ||
+		(*name == *marker && !cistrncmp(name + 1, marker, 7));
 }
 
 //==========================================================================
