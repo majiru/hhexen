@@ -14,7 +14,6 @@ int mb_used = 32;	/* 32MB heap */
 void I_Init (void)
 {
 	I_InitSound();
-	I_InitGraphics();
 	I_MouseEnable(1);
 }
 

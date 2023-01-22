@@ -89,6 +89,9 @@ typedef struct
 #define SPAC_PUSH		4	/* when player/monster pushes line */
 #define SPAC_PCROSS		5	/* when projectile crosses line */
 
+
+#pragma pack on
+
 typedef	struct
 {
 	short		floorheight;
@@ -98,7 +101,9 @@ typedef	struct
 	short		lightlevel;
 	short		special;
 	short		tag;
-} __attribute__((__packed__)) mapsector_t;
+} mapsector_t;
+
+#pragma pack off
 
 typedef struct
 {
@@ -165,6 +170,8 @@ typedef struct
 
 /* ---- Texture definition ---- */
 
+#pragma pack on
+
 typedef struct
 {
 	short		originx;
@@ -172,7 +179,7 @@ typedef struct
 	short		patch;
 	short		stepdir;
 	short		colormap;
-} __attribute__((__packed__)) mappatch_t;
+} mappatch_t;
 
 typedef struct
 {
@@ -183,7 +190,7 @@ typedef struct
 	int32_t		columndirectory;	/* OBSOLETE */
 	short		patchcount;
 	mappatch_t	patches[1];
-} __attribute__((__packed__)) maptexture_t;
+} maptexture_t;
 
 
 /* ---- Graphics ---- */
@@ -194,7 +201,9 @@ typedef struct
 	byte		topdelta;	/* -1 is the last post in a column */
 	byte		length;
 	/* length data bytes follows */
-} __attribute__((__packed__)) post_t;
+} post_t;
+
+#pragma pack off
 
 /* column_t is a list of 0 or more post_t, (byte)-1 terminated */
 typedef post_t	column_t;
