@@ -14,10 +14,10 @@
 #include "i_sound.h"
 #include "audio_plugin.h"
 
-#define SAMPLE_FORMAT	FMT_S16_NE
 #define SAMPLE_ZERO	0
 #define SAMPLE_RATE	11025	/* Hz */
 #define SAMPLE_CHANNELS	2
+#define TARGET_RATE	44100
 
 #define SAMPLE_TYPE	short
 
@@ -74,11 +74,10 @@ static SAMPLE_TYPE	vol_lookup[MAX_VOL * 256];
 
 static int	steptable[256];		/* Pitch to stepping lookup */
 
-#define BUF_LEN		(256 * 2)
+#define BUF_LEN		(256 * 2 * 4)
 
 static int audiofd;
 static int audiopid = -1;
-static int convpid = -1;
 
 static QLock audiolk;
 
@@ -92,20 +91,10 @@ static void audioproc(void)
 	unsigned int sample;
 	register int dl;
 	register int dr;
-	int pip[2];
+	int i;
 
 	end = (SAMPLE_TYPE *) (buf + BUF_LEN);
 	cend = channel + CHAN_COUNT;
-
-	pipe(pip);
-	if((convpid = rfork(RFFDG|RFPROC|RFMEM)) == 0){
-		close(pip[0]);
-		dup(pip[1], 0);
-		dup(audiofd, 1);
-		execl("/bin/audio/pcmconv", "-i", "s16r11025", "-o", "s16r44100", nil);
-		exits(nil);
-	}
-	close(pip[1]);
 
 	for(;;){
 		begin = (SAMPLE_TYPE *) buf;
@@ -139,16 +128,18 @@ static void audioproc(void)
 				}
 			}
 			qunlock(&audiolk);
-			if (dl > 0x7fff)
-				dl = 0x7fff;
-			else if (dl < -0x8000)
-				dl = -0x8000;
-			if (dr > 0x7fff)
-				dr = 0x7fff;
-			else if (dr < -0x8000)
-				dr = -0x8000;
-			*begin++ = dl;
-			*begin++ = dr;
+			for(i=0; i < TARGET_RATE/SAMPLE_RATE; i++){
+				if (dl > 0x7fff)
+					dl = 0x7fff;
+				else if (dl < -0x8000)
+					dl = -0x8000;
+				if (dr > 0x7fff)
+					dr = 0x7fff;
+				else if (dr < -0x8000)
+					dr = -0x8000;
+				*begin++ = dl;
+				*begin++ = dr;
+			}
 		}
 		write(audiofd, buf, BUF_LEN);
 	}
@@ -157,6 +148,7 @@ static void audioproc(void)
 
 void I_SetSfxVolume(int volume)
 {
+	USED(volume);
 }
 
 // Gets lump nums of the named sound.  Returns pointer which will be
@@ -187,6 +179,7 @@ int I_StartSound(int id, void *data, int vol, int sep, int pitch, int priority)
 	int oldest;
 	int i;
 
+	USED(id);
 	// Find an empty channel, the oldest playing channel, or default to 0.
 	// Currently ignoring priority.
 
@@ -300,8 +293,6 @@ void I_UpdateSoundParams(int handle, int vol, int sep, int pitch)
 // inits all sound stuff
 void I_StartupSound (void)
 {
-	int ok;
-
 	snd_SfxAvail = false;
 
 	if (M_CheckParm("--nosound") || M_CheckParm("-s") || M_CheckParm("-nosound"))
@@ -341,6 +332,7 @@ void I_SetChannels(int channels)
 	int *steptablemid;
 
 	// We always have CHAN_COUNT channels.
+	USED(channels);
 
 	for (j = 0; j < CHAN_COUNT; j++)
 	{
@@ -378,41 +370,50 @@ void I_SetChannels(int channels)
 
 int I_RegisterSong(void *data)
 {
+	USED(data);
 	return 0;
 }
 
 int I_RegisterExternalSong(const char *nm)
 {
+	USED(nm);
 	return 0;
 }
 
 void I_UnRegisterSong(int handle)
 {
+	USED(handle);
 }
 
 void I_PauseSong(int handle)
 {
+	USED(handle);
 }
 
 void I_ResumeSong(int handle)
 {
+	USED(handle);
 }
 
 void I_SetMusicVolume(int volume)
 {
+	USED(volume);
 }
 
 int I_QrySongPlaying(int handle)
 {
+	USED(handle);
 	return 0;
 }
 
 // Stops a song.  MUST be called before I_UnregisterSong().
 void I_StopSong(int handle)
 {
+	USED(handle);
 }
 
 void I_PlaySong(int handle, boolean looping)
 {
+	USED(handle); USED(looping);
 }
 
