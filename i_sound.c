@@ -14,18 +14,12 @@
 #include "i_sound.h"
 #include "audio_plugin.h"
 
-
 #define SAMPLE_FORMAT	FMT_S16_NE
 #define SAMPLE_ZERO	0
 #define SAMPLE_RATE	11025	/* Hz */
 #define SAMPLE_CHANNELS	2
 
-#if 0
-#define SAMPLE_TYPE	char
-#else
 #define SAMPLE_TYPE	short
-#endif
-
 
 /*
  *	SOUND HEADER & DATA
@@ -66,7 +60,6 @@ typedef struct
 	int32_t		length;		/* sample length */
 	unsigned char	firstSample;
 } Sample;
-
 #pragma pack off
 
 static int	audio_exit_thread = 1;
@@ -83,8 +76,13 @@ static int	steptable[256];		/* Pitch to stepping lookup */
 
 #define BUF_LEN		(256 * 2)
 
+static int audiofd;
+static int audiopid = -1;
+static int convpid = -1;
 
-static void audio_loop (void *arg)
+static QLock audiolk;
+
+static void audioproc(void)
 {
 	Channel* chan;
 	Channel* cend;
@@ -94,25 +92,33 @@ static void audio_loop (void *arg)
 	unsigned int sample;
 	register int dl;
 	register int dr;
+	int pip[2];
 
 	end = (SAMPLE_TYPE *) (buf + BUF_LEN);
 	cend = channel + CHAN_COUNT;
 
-    while (! audio_exit_thread) {
+	pipe(pip);
+	if((convpid = rfork(RFFDG|RFPROC|RFMEM)) == 0){
+		close(pip[0]);
+		dup(pip[1], 0);
+		dup(audiofd, 1);
+		execl("/bin/audio/pcmconv", "-i", "s16r11025", "-o", "s16r44100", nil);
+		exits(nil);
+	}
+	close(pip[1]);
 
-	begin = (SAMPLE_TYPE *) buf;
-	while (begin < end)
-	{
-	// Mix all the channels together.
-		dl = SAMPLE_ZERO;
-		dr = SAMPLE_ZERO;
+	for(;;){
+		begin = (SAMPLE_TYPE *) buf;
+		while (begin < end){
+			// Mix all the channels together.
+			dl = SAMPLE_ZERO;
+			dr = SAMPLE_ZERO;
 
-		chan = channel;
-		for ( ; chan < cend; chan++)
-		{
-			// Check channel, if active.
-			if (chan->begin)
-			{
+			qlock(&audiolk);
+			chan = channel;
+			for ( ; chan < cend; chan++){
+				if(!chan->begin)
+					continue;
 				// Get the sample from the channel.
 				sample = *chan->begin;
 
@@ -129,41 +135,23 @@ static void audio_loop (void *arg)
 				if (chan->begin >= chan->end)
 				{
 					chan->begin = NULL;
-				//	printf ("  channel done %d\n", chan);
+				//printf ("  channel done %d\n", chan);
 				}
 			}
+			qunlock(&audiolk);
+			if (dl > 0x7fff)
+				dl = 0x7fff;
+			else if (dl < -0x8000)
+				dl = -0x8000;
+			if (dr > 0x7fff)
+				dr = 0x7fff;
+			else if (dr < -0x8000)
+				dr = -0x8000;
+			*begin++ = dl;
+			*begin++ = dr;
 		}
-
-#if 0	/* SAMPLE_FORMAT */
-		if (dl > 127)
-			dl = 127;
-		else if (dl < -128)
-			dl = -128;
-		if (dr > 127)
-			dr = 127;
-		else if (dr < -128)
-			dr = -128;
-#else
-		if (dl > 0x7fff)
-			dl = 0x7fff;
-		else if (dl < -0x8000)
-			dl = -0x8000;
-		if (dr > 0x7fff)
-			dr = 0x7fff;
-		else if (dr < -0x8000)
-			dr = -0x8000;
-#endif
-
-		*begin++ = dl;
-		*begin++ = dr;
+		write(audiofd, buf, BUF_LEN);
 	}
-
-	// This write is expected to block.
-	//audioPI->write_audio(buf, BUF_LEN);
-
-    } /* end of the while(!audio_exit_thread) loop. */
-
-    //pthread_exit(NULL);
 }
 
 
@@ -260,6 +248,7 @@ void I_UpdateSoundParams(int handle, int vol, int sep, int pitch)
 	int lvol, rvol;
 	Channel *chan;
 
+	qlock(&audiolk);
 	// Set left/right channel volume based on seperation.
 	sep += 1;	// range 1 - 256
 	lvol = vol - ((vol * sep * sep) >> 16);	// (256*256);
@@ -300,6 +289,7 @@ void I_UpdateSoundParams(int handle, int vol, int sep, int pitch)
 	chan->step_remainder = 0;
 	chan->lvol_table = &vol_lookup[lvol * 256];
 	chan->rvol_table = &vol_lookup[rvol * 256];
+	qunlock(&audiolk);
 }
 
 
@@ -310,7 +300,6 @@ void I_UpdateSoundParams(int handle, int vol, int sep, int pitch)
 // inits all sound stuff
 void I_StartupSound (void)
 {
-	/*
 	int ok;
 
 	snd_SfxAvail = false;
@@ -321,33 +310,29 @@ void I_StartupSound (void)
 		return;
 	}
 
-	// Using get_oplugin_info() from oss.c.  In the future this could
-	//   load from a real shared library plugin.
-	audioPI = get_oplugin_info();
-	if (!audioPI)
+	audiofd = open("/dev/audio", OWRITE);
+	if(audiofd < 0){
+		ST_Message("I_StartupSound: /dev/audio could not be opened\n");
 		return;
-	audioPI->init();
-	audioPI->about();
+	}
 
-	ok = audioPI->open_audio(SAMPLE_FORMAT, SAMPLE_RATE, SAMPLE_CHANNELS);
-	if (ok)
-	{
-		audio_exit_thread = 0;
-		pthread_create(&audio_thread, NULL, audio_loop, NULL);
-		fprintf (stdout, "I_StartupSound: success\n");
-		snd_SfxAvail = true;
+	snd_SfxAvail = true;
+
+	if((audiopid = rfork(RFPROC|RFMEM)) == 0){
+		audioproc();
+		exits(nil);
 	}
-	else
-	{
-		fprintf (stderr, "I_StartupSound: failed\n");
-	}
-	*/
 }
 
 // shuts down all sound stuff
 void I_ShutdownSound (void)
 {
 	snd_SfxAvail = false;
+
+	if(audiopid != -1){
+		postnote(PNPROC, audiopid, "shutdown");
+		audiopid = -1;
+	}
 }
 
 void I_SetChannels(int channels)
@@ -380,11 +365,7 @@ void I_SetChannels(int channels)
 
 		// Turn the unsigned samples into signed samples.
 
-#if 0	/* SAMPLE_FORMAT */
-			vol_lookup[v*256+j] = (v * (j-128)) / (MAX_VOL-1);
-#else
 			vol_lookup[v*256+j] = (v * (j-128) * 256) / (MAX_VOL-1);
-#endif
 		//	printf ("vol_lookup[%d*256+%d] = %d\n", v, j, vol_lookup[v*256+j]);
 		}
 	}
