@@ -33,13 +33,13 @@ enum
 	ML_BEHAVIOR
 };
 
+#pragma pack on
+
 typedef struct
 {
 	short		x;
 	short		y;
 } mapvertex_t;
-
-#pragma pack on
 
 typedef struct
 {
@@ -50,8 +50,6 @@ typedef struct
 	char		midtexture[8];
 	short		sector;	/* on viewer's side */
 } mapsidedef_t;
-
-#pragma pack off
 
 typedef struct
 {
@@ -66,6 +64,8 @@ typedef struct
 	byte		arg5;
 	short		sidenum[2];	/* sidenum[1] will be -1 if one sided */
 } maplinedef_t;
+
+#pragma pack off
 
 #define	ML_BLOCKING		0x0001
 #define	ML_BLOCKMONSTERS	0x0002
@@ -102,8 +102,6 @@ typedef	struct
 	short		special;
 	short		tag;
 } mapsector_t;
-
-#pragma pack off
 
 typedef struct
 {
@@ -170,8 +168,6 @@ typedef struct
 
 /* ---- Texture definition ---- */
 
-#pragma pack on
-
 typedef struct
 {
 	short		originx;
@@ -203,8 +199,6 @@ typedef struct
 	/* length data bytes follows */
 } post_t;
 
-#pragma pack off
-
 /* column_t is a list of 0 or more post_t, (byte)-1 terminated */
 typedef post_t	column_t;
 
@@ -220,6 +214,8 @@ typedef struct
 	int		columnofs[8];		/* only [width] used */
 							/* the [0] is &columnofs[width] */
 } patch_t;
+
+#pragma pack off
 
 #endif	/* __XDDEFS__ */
 
