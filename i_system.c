@@ -13,7 +13,7 @@ int mb_used = 32;	/* 32MB heap */
 
 void I_Init (void)
 {
-	I_InitSound();
+	S_Init();
 	I_MouseEnable(1);
 }
 
@@ -39,7 +39,6 @@ void I_Quit (void)
 {
 	D_QuitNetGame ();
 	I_ShutdownSound();
-	I_ShutdownMusic();
 	M_SaveDefaults ();
 	I_ShutdownGraphics();
 	exits(nil);

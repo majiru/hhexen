@@ -1,173 +1,406 @@
-/* i_sound.c */
+//**************************************************************************
+//**
+//** i_soundpi.c: unix sound driver using a plugin interface
+//**
+//** $Revision: 512 $
+//** $Date: 2009-06-04 18:00:34 +0300 (Thu, 04 Jun 2009) $
+//**
+//**************************************************************************
 
-#include "i_system.h"
+
+#include "h2stdinc.h"
+#include "h2def.h"
+#include "sounds.h"
 #include "i_sound.h"
-//#include "w_wad.h"	// W_GetNumForName()
-//#include "z_zone.h"
-//#include "m_argv.h"
+#include "audio_plugin.h"
 
-/* The number of internal mixing channels,
-**  the samples calculated for each mixing step,
-**  the size of the 16bit, 2 hardware channel (stereo)
-**  mixing buffer, and the samplerate of the raw data.
-*/
 
-/* Needed for calling the actual sound output. */
-#define	AUDFREQ		44100
-#define	SFXFREQ		11025
-#define	SAMPLECOUNT	(AUDFREQ/TICRATE)
-#define	NUM_CHANNELS	8
+#define SAMPLE_FORMAT	FMT_S16_NE
+#define SAMPLE_ZERO	0
+#define SAMPLE_RATE	11025	/* Hz */
+#define SAMPLE_CHANNELS	2
 
-/* The actual lengths of all sound effects. */
-int	lengths[NUMSFX];
+#if 0
+#define SAMPLE_TYPE	char
+#else
+#define SAMPLE_TYPE	short
+#endif
 
-/* The actual output device. */
-static int audio_fd = -1;
 
-/* The global mixing buffer.
-** Basically, samples from all active internal channels
-**  are modified and added, and stored in the buffer
-**  that is submitted to the audio device.
-*/
-uchar mixbuf[SAMPLECOUNT*4];
+/*
+ *	SOUND HEADER & DATA
+ */
 
-/* The channel step amount... */
-uint	channelstep[NUM_CHANNELS];
-/* ... and a 0.16 bit remainder of last step. */
-uint	channelstepremainder[NUM_CHANNELS];
-
-/* The channel data pointers, start and end. */
-uchar*	channels[NUM_CHANNELS];
-uchar*	channelsend[NUM_CHANNELS];
-
-/* Time/gametic that the channel started playing,
-**  used to determine oldest, which automatically
-**  has lowest priority.
-** In case number of active sounds exceeds
-**  available channels.
-*/
-int	channelstart[NUM_CHANNELS];
-
-/* The sound in channel handles,
-**  determined on registration,
-**  might be used to unregister/stop/modify,
-**  currently unused.
-*/
-int	channelhandles[NUM_CHANNELS];
-
-/* SFX id of the playing sound effect.
-** Used to catch duplicates (like chainsaw).
-*/
-int	channelids[NUM_CHANNELS];
-
-/* Pitch to stepping lookup, unused. */
-int	steptable[256];
-
-/* Volume lookups. */
-int	vol_lookup[128*256];
-
-/* Hardware left and right channel volume lookup. */
-int*	channelleftvol_lookup[NUM_CHANNELS];
-int*	channelrightvol_lookup[NUM_CHANNELS];
-
-int snd_MaxVolume;
-int UpdateState;
 int snd_Channels;
-int snd_MusicVolume;
+int snd_MaxVolume,		/* maximum volume for sound */
+	snd_MusicVolume;	/* maximum volume for music */
+boolean snd_MusicAvail,		/* whether music is available */
+	snd_SfxAvail;		/* whether sfx are available */
 
-void I_StartupSound(void)
+/*
+ *	SOUND FX API
+ */
+
+typedef struct
+{
+	unsigned char	*begin;		/* pointers into Sample.firstSample */
+	unsigned char	*end;
+
+	SAMPLE_TYPE	*lvol_table;	/* point into vol_lookup */
+	SAMPLE_TYPE	*rvol_table;
+
+	unsigned int	pitch_step;
+	unsigned int	step_remainder;	/* 0.16 bit remainder of last step. */
+
+	int		pri;
+	unsigned int	time;
+} Channel;
+
+#pragma pack on
+typedef struct
+{
+/* Sample data is a lump from a wad: byteswap the a, freq
+ * and the length fields before using them		*/
+	short		a;		/* always 3	*/
+	short		freq;		/* always 11025	*/
+	int32_t		length;		/* sample length */
+	unsigned char	firstSample;
+} Sample;
+
+#pragma pack off
+
+static int	audio_exit_thread = 1;
+//static pthread_t	audio_thread;
+
+
+#define CHAN_COUNT	8
+static Channel	channel[CHAN_COUNT];
+
+#define MAX_VOL		64	/* 64 keeps our table down to 16Kb */
+static SAMPLE_TYPE	vol_lookup[MAX_VOL * 256];
+
+static int	steptable[256];		/* Pitch to stepping lookup */
+
+#define BUF_LEN		(256 * 2)
+
+
+static void audio_loop (void *arg)
+{
+	Channel* chan;
+	Channel* cend;
+	char buf[BUF_LEN];
+	SAMPLE_TYPE *begin;
+	SAMPLE_TYPE *end;
+	unsigned int sample;
+	register int dl;
+	register int dr;
+
+	end = (SAMPLE_TYPE *) (buf + BUF_LEN);
+	cend = channel + CHAN_COUNT;
+
+    while (! audio_exit_thread) {
+
+	begin = (SAMPLE_TYPE *) buf;
+	while (begin < end)
+	{
+	// Mix all the channels together.
+		dl = SAMPLE_ZERO;
+		dr = SAMPLE_ZERO;
+
+		chan = channel;
+		for ( ; chan < cend; chan++)
+		{
+			// Check channel, if active.
+			if (chan->begin)
+			{
+				// Get the sample from the channel.
+				sample = *chan->begin;
+
+				// Adjust volume accordingly.
+				dl += chan->lvol_table[sample];
+				dr += chan->rvol_table[sample];
+
+				// Increment sample pointer with pitch adjustment.
+				chan->step_remainder += chan->pitch_step;
+				chan->begin += chan->step_remainder >> 16;
+				chan->step_remainder &= 65535;
+
+				// Check whether we are done.
+				if (chan->begin >= chan->end)
+				{
+					chan->begin = NULL;
+				//	printf ("  channel done %d\n", chan);
+				}
+			}
+		}
+
+#if 0	/* SAMPLE_FORMAT */
+		if (dl > 127)
+			dl = 127;
+		else if (dl < -128)
+			dl = -128;
+		if (dr > 127)
+			dr = 127;
+		else if (dr < -128)
+			dr = -128;
+#else
+		if (dl > 0x7fff)
+			dl = 0x7fff;
+		else if (dl < -0x8000)
+			dl = -0x8000;
+		if (dr > 0x7fff)
+			dr = 0x7fff;
+		else if (dr < -0x8000)
+			dr = -0x8000;
+#endif
+
+		*begin++ = dl;
+		*begin++ = dr;
+	}
+
+	// This write is expected to block.
+	//audioPI->write_audio(buf, BUF_LEN);
+
+    } /* end of the while(!audio_exit_thread) loop. */
+
+    //pthread_exit(NULL);
+}
+
+
+void I_SetSfxVolume(int volume)
 {
 }
 
-void I_InitSound(void)
+// Gets lump nums of the named sound.  Returns pointer which will be
+// passed to I_StartSound() when you want to start an SFX.  Must be
+// sure to pass this to UngetSoundEffect() so that they can be
+// freed!
+
+int I_GetSfxLumpNum(sfxinfo_t *sound)
 {
+	return W_GetNumForName(sound->lumpname);
 }
 
-/* This function loops all active (internal) sound
-**  channels, retrieves a given number of samples
-**  from the raw sound data, modifies it according
-**  to the current (internal) channel parameters,
-**  mixes the per-channel samples into the global
-**  mixbuffer, clamping it to the allowed range,
-**  and sets up everything for transferring the
-**  contents of the mixbuffer to the (two)
-**  hardware channels (left and right, that is).
-**
-** This function currently supports only 16bit.
-*/
-void I_UpdateSound(void)
-{
-}
 
-void I_ShutdownSound(void)
-{
-}
+// Id is unused.
+// Data is a pointer to a Sample structure.
+// Volume ranges from 0 to 127.
+// Separation (orientation/stereo) ranges from 0 to 255.  128 is balanced.
+// Pitch ranges from 0 to 255.  Normal is 128.
+// Priority looks to be unused (always 0).
 
-void I_SetChannels(int channels)
+int I_StartSound(int id, void *data, int vol, int sep, int pitch, int priority)
 {
-}
+	// Relative time order to find oldest sound.
+	static unsigned int soundTime = 0;
+	int chanId;
+	Sample *sample;
+	Channel *chan;
+	int oldest;
+	int i;
 
-int I_GetSfxLumpNum(sfxinfo_t *sfxinfo)
-{
-	return 0;
-}
+	// Find an empty channel, the oldest playing channel, or default to 0.
+	// Currently ignoring priority.
 
-int I_StartSound(int id, void *data, int vol, int sep, int pitch, int)
-{
-	return 0;
+	chanId = 0;
+	oldest = soundTime;
+	for (i = 0; i < CHAN_COUNT; i++)
+	{
+		if (! channel[ i ].begin)
+		{
+			chanId = i;
+			break;
+		}
+		if (channel[ i ].time < oldest)
+		{
+			chanId = i;
+			oldest = channel[ i ].time;
+		}
+	}
+
+	sample = (Sample *) data;
+	chan = &channel[chanId];
+
+	I_UpdateSoundParams(chanId + 1, vol, sep, pitch);
+
+	// begin must be set last because the audio thread will access the channel
+	// once it is non-zero.  Perhaps this should be protected by a mutex.
+	chan->pri = priority;
+	chan->time = soundTime;
+	chan->end = &sample->firstSample + LONG(sample->length);
+	chan->begin = &sample->firstSample;
+
+	soundTime++;
+
+#if 0
+	printf ("I_StartSound %d: v:%d s:%d p:%d pri:%d | %d %d %d %d\n",
+		id, vol, sep, pitch, priority,
+		chanId, chan->pitch_step, SHORT(sample->a), SHORT(sample->freq));
+#endif
+
+	return chanId + 1;
 }
 
 void I_StopSound(int handle)
 {
-	USED(handle);
-//	printf("PORTME i_sound.c I_StopSound\n");
+	handle--;
+	handle &= 7;
+	channel[handle].begin = NULL;
 }
 
 int I_SoundIsPlaying(int handle)
 {
-	return 1;
+	handle--;
+	handle &= 7;
+	return (channel[ handle ].begin != NULL);
 }
 
 void I_UpdateSoundParams(int handle, int vol, int sep, int pitch)
 {
-	/* I fail to see that this is used.
-	** Would be using the handle to identify
-	**  on which channel the sound might be active,
-	**  and resetting the channel parameters.
+	int lvol, rvol;
+	Channel *chan;
+
+	// Set left/right channel volume based on seperation.
+	sep += 1;	// range 1 - 256
+	lvol = vol - ((vol * sep * sep) >> 16);	// (256*256);
+	sep = sep - 257;
+	rvol = vol - ((vol * sep * sep) >> 16);
+
+	// Sanity check, clamp volume.
+	if (rvol < 0)
+	{
+	//	printf ("rvol out of bounds %d, id %d\n", rvol, handle);
+		rvol = 0;
+	}
+	else if (rvol > 127)
+	{
+	//	printf ("rvol out of bounds %d, id %d\n", rvol, handle);
+		rvol = 127;
+	}
+
+	if (lvol < 0)
+	{
+	//	printf ("lvol out of bounds %d, id %d\n", lvol, handle);
+		lvol = 0;
+	}
+	else if (lvol > 127)
+	{
+	//	printf ("lvol out of bounds %d, id %d\n", lvol, handle);
+		lvol = 127;
+	}
+
+	// Limit to MAX_VOL (64)
+	lvol >>= 1;
+	rvol >>= 1;
+
+	handle--;
+	handle &= 7;
+	chan = &channel[handle];
+	chan->pitch_step = steptable[pitch];
+	chan->step_remainder = 0;
+	chan->lvol_table = &vol_lookup[lvol * 256];
+	chan->rvol_table = &vol_lookup[rvol * 256];
+}
+
+
+/*
+ *	SOUND STARTUP STUFF
+ */
+
+// inits all sound stuff
+void I_StartupSound (void)
+{
+	/*
+	int ok;
+
+	snd_SfxAvail = false;
+
+	if (M_CheckParm("--nosound") || M_CheckParm("-s") || M_CheckParm("-nosound"))
+	{
+		ST_Message("I_StartupSound: Sound Disabled.\n");
+		return;
+	}
+
+	// Using get_oplugin_info() from oss.c.  In the future this could
+	//   load from a real shared library plugin.
+	audioPI = get_oplugin_info();
+	if (!audioPI)
+		return;
+	audioPI->init();
+	audioPI->about();
+
+	ok = audioPI->open_audio(SAMPLE_FORMAT, SAMPLE_RATE, SAMPLE_CHANNELS);
+	if (ok)
+	{
+		audio_exit_thread = 0;
+		pthread_create(&audio_thread, NULL, audio_loop, NULL);
+		fprintf (stdout, "I_StartupSound: success\n");
+		snd_SfxAvail = true;
+	}
+	else
+	{
+		fprintf (stderr, "I_StartupSound: failed\n");
+	}
 	*/
-	USED(handle, vol, sep, pitch);
 }
 
-void I_InitMusic(void)
+// shuts down all sound stuff
+void I_ShutdownSound (void)
 {
+	snd_SfxAvail = false;
 }
 
-void I_ShutdownMusic(void)
+void I_SetChannels(int channels)
 {
+	int v, j;
+	int *steptablemid;
+
+	// We always have CHAN_COUNT channels.
+
+	for (j = 0; j < CHAN_COUNT; j++)
+	{
+		channel[j].begin = NULL;
+		channel[j].end   = NULL;
+		channel[j].time = 0;
+	}
+
+	// This table provides step widths for pitch parameters.
+	steptablemid = steptable + 128;
+	for (j = -128; j < 128; j++)
+	{
+		steptablemid[j] = (int) (pow(2.0, (j/64.0)) * 65536.0);
+	}
+
+	// Generate the volume lookup tables.
+	for (v = 0; v < MAX_VOL; v++)
+	{
+		for (j = 0; j < 256; j++)
+		{
+		//	vol_lookup[v*256+j] = 128 + ((v * (j-128)) / (MAX_VOL-1));
+
+		// Turn the unsigned samples into signed samples.
+
+#if 0	/* SAMPLE_FORMAT */
+			vol_lookup[v*256+j] = (v * (j-128)) / (MAX_VOL-1);
+#else
+			vol_lookup[v*256+j] = (v * (j-128) * 256) / (MAX_VOL-1);
+#endif
+		//	printf ("vol_lookup[%d*256+%d] = %d\n", v, j, vol_lookup[v*256+j]);
+		}
+	}
 }
 
-void I_SetMusicVolume(int)
-{
-}
 
-void I_PauseSong(int)
-{
-}
-
-void I_ResumeSong(int)
-{
-}
-
-void I_PlaySong(int handle, int loop)
-{
-}
-
-void I_StopSong(int)
-{
-	I_ShutdownMusic();
-}
+/*
+ *	SONG API
+ */
 
 int I_RegisterSong(void *data)
+{
+	return 0;
+}
+
+int I_RegisterExternalSong(const char *nm)
 {
 	return 0;
 }
@@ -176,7 +409,29 @@ void I_UnRegisterSong(int handle)
 {
 }
 
-int I_RegisterExternalSong(char *name)
+void I_PauseSong(int handle)
+{
+}
+
+void I_ResumeSong(int handle)
+{
+}
+
+void I_SetMusicVolume(int volume)
+{
+}
+
+int I_QrySongPlaying(int handle)
 {
 	return 0;
 }
+
+// Stops a song.  MUST be called before I_UnregisterSong().
+void I_StopSong(int handle)
+{
+}
+
+void I_PlaySong(int handle, boolean looping)
+{
+}
+

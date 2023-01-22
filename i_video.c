@@ -7,6 +7,7 @@
 
 extern byte *screens;
 int DisplayTicker = 0;
+int UpdateState = 0;
 
 #include <draw.h>
 #include <mouse.h>
@@ -61,6 +62,8 @@ void I_InitGraphics(void)
 		exits(nil);
 	}
 	mousepid = pid;
+
+	I_SetPalette ((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 
 void I_ShutdownGraphics(void)
@@ -101,6 +104,9 @@ void I_Update(void)
 	uchar *s, *e, *d, *m;
 	uchar buf[SCREENWIDTH*3*12];
 
+	if(UpdateState == I_NOUPDATE)
+		return;
+
 	if(resized){
 		resized = 0;
 		if(getwindow(display, Refnone) < 0)
@@ -118,6 +124,9 @@ void I_Update(void)
 		scale = 1;
 	else if(scale > 12)
 		scale = 12;
+	if (UpdateState & I_FULLSCRN){
+		UpdateState = I_NOUPDATE;
+	}
 
 	/* where to draw the scaled row */
 	r = rectsubpt(rectaddpt(Rect(0, 0, scale*SCREENWIDTH, scale), center),
@@ -200,6 +209,7 @@ void I_MouseEnable(int on)
 	static char nocurs[2*4+2*2*16];
 	static int fd = -1;
 
+	/*
 	if(mouseactive == on || !usemouse)
 		return;
 	if(mouseactive = on){
@@ -210,6 +220,7 @@ void I_MouseEnable(int on)
 		close(fd);
 		fd = -1;
 	}
+	*/
 }
 
 void I_ReadScreen(byte *scr)
