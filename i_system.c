@@ -126,18 +126,18 @@ char* I_IdentifyWAD(char *wadname)
 		return path;
 
 	if(home = getenv("home")){
-		snprintf(path, sizeof path, "%s/lib/doom/%s", home, wadname);
+		snprintf(path, sizeof path, "%s/lib/hexen/%s", home, wadname);
 		free(home);
 
 		if (I_FileExists (path))
 			return path;
 	}
 
-	snprintf(path, sizeof path, "/sys/lib/doom/%s", wadname);
+	snprintf(path, sizeof path, "/sys/lib/hexen/%s", wadname);
 	if (I_FileExists (path))
 		return path;
 
-	snprintf(path, sizeof path, "/sys/games/lib/doom/%s", wadname);
+	snprintf(path, sizeof path, "/sys/games/lib/hexen/%s", wadname);
 	if (I_FileExists (path))
 		return path;
 

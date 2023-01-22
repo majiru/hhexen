@@ -43,7 +43,7 @@ void I_InitGraphics(void)
 
 	notify(catch);
 
-	if(initdraw(nil, nil, "doom") < 0)
+	if(initdraw(nil, nil, "hexen") < 0)
 		I_Error("I_InitGraphics failed");
 
 	draw(screen, screen->r, display->black, nil, ZP);
@@ -209,7 +209,6 @@ void I_MouseEnable(int on)
 	static char nocurs[2*4+2*2*16];
 	static int fd = -1;
 
-	/*
 	if(mouseactive == on || !usemouse)
 		return;
 	if(mouseactive = on){
@@ -220,7 +219,6 @@ void I_MouseEnable(int on)
 		close(fd);
 		fd = -1;
 	}
-	*/
 }
 
 void I_ReadScreen(byte *scr)

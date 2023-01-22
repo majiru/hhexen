@@ -16,6 +16,7 @@
 #include "p_local.h"
 #include "soundst.h"
 #include "v_compat.h"
+#include "i_system.h"
 
 // MACROS ------------------------------------------------------------------
 
@@ -112,6 +113,8 @@ static int demosequence;
 static int pagetic;
 static const char *pagename;
 
+static char basedefault[1024];
+
 static const char *wadfiles[MAXWADFILES + 1] =
 {
 	"hexen.wad",
@@ -184,7 +187,9 @@ void InitMapMusicInfo(void);
 
 void H2_Main(void)
 {
-	int p;
+	int p, i;
+	char *slash;
+	char *wadloc[nelem(wadfiles)];
 
 	M_FindResponseFile();
 	setbuf(stdout, NULL);
@@ -200,17 +205,31 @@ void H2_Main(void)
 	ST_Message("V_Init: allocate screens.\n");
 	V_Init();
 
-	// Load defaults before initing other systems
-	ST_Message("M_LoadDefaults: Load system defaults.\n");
-	M_LoadDefaults(CONFIG_FILE_NAME);
-
 	// HEXEN MODIFICATION:
 	// There is a realloc() in W_AddFile() that might fail if the zone
 	// heap has been previously allocated, so we need to initialize the
 	// WAD files BEFORE the zone memory initialization.
 	ST_Message("W_Init: Init WADfiles.\n");
-	W_InitMultipleFiles(wadfiles);
+	for(i = 0; i < nelem(wadfiles); i++){
+		if(wadfiles[i] == nil){
+			wadloc[i] = nil;
+			break;
+		} else
+			wadloc[i] = I_IdentifyWAD(wadfiles[i]);
+	}
+	W_InitMultipleFiles(wadloc);
 	W_CheckWADFiles();
+
+	strncpy(basedefault, wadloc[0], sizeof(basedefault)-5);
+	basedefault[sizeof(basedefault)-5] = '\0';
+	slash = strrchr(basedefault, '/');
+	if (slash++ == 0)
+		slash = basedefault;
+	strcpy(slash, "cfg");
+
+	// Load defaults before initing other systems
+	ST_Message("M_LoadDefaults: Load system defaults.\n");
+	M_LoadDefaults(basedefault);
 
 	ST_Message("Z_Init: Init zone memory allocation daemon.\n");
 	Z_Init();
