@@ -1,6 +1,6 @@
 </$objtype/mkfile
 
-BIN=/$objtype/bin
+BIN=/$objtype/bin/games
 TARG=hexen
 CFLAGS=-Fpw
 
