@@ -648,7 +648,7 @@ void W_ReadLump(int lump, void *dest)
 	}
 	l = lumpinfo+lump;
 	//I_BeginRead();
-	lseek(l->handle, l->position, SEEK_SET);
+	seek(l->handle, l->position, 0);
 	c = read(l->handle, dest, l->size);
 	if (c < l->size)
 	{

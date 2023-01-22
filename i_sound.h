@@ -1,54 +1,112 @@
-//**************************************************************************
-//**
-//** i_sound.h : Heretic 2 : Raven Software, Corp.
-//**
-//** $Revision: 421 $
-//** $Date: 2009-05-22 16:08:37 +0300 (Fri, 22 May 2009) $
-//**
-//**************************************************************************
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
+//
+// $Id:$
+//
+// Copyright (C) 1993-1996 by id Software, Inc.
+//
+// This source is available for distribution and/or modification
+// only under the terms of the DOOM Source Code License as
+// published by id Software. All rights reserved.
+//
+// The source is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
+// for more details.
+//
+//
+// DESCRIPTION:
+//	System interface, sound.
+//
+//-----------------------------------------------------------------------------
 
-#ifndef __SOUND__
-#define __SOUND__
+#ifndef __I_SOUND__
+#define __I_SOUND__
 
-#define SND_TICRATE		140	/* tic rate for updating sound */
-#define SND_MAXSONGS		40	/* max number of songs in game */
-#define SND_SAMPLERATE		11025	/* sample rate of sound effects */
+#include "h2stdinc.h"
+#include "h2def.h"
 
-typedef enum
-{
-	snd_none,
-	snd_PC,
-	snd_Adlib,
-	snd_SB,
-	snd_PAS,
-	snd_GUS,
-	snd_MPU,
-	snd_MPU2,
-	snd_MPU3,
-	snd_AWE,
-	snd_CDMUSIC,
-	NUM_SCARDS
-} cardenum_t;
+//#include "doomstat.h"
+#include "sounds.h"
 
-void I_PauseSong(int handle);
-void I_ResumeSong(int handle);
-void I_SetMusicVolume(int volume);
-void I_SetSfxVolume(int volume);
-int I_RegisterSong(void *data);
-int I_RegisterExternalSong(const char *name);	/* External music file support */
-void I_UnRegisterSong(int handle);
-int I_QrySongPlaying(int handle);
-void I_StopSong(int handle);
-void I_PlaySong(int handle, boolean looping);
-int I_GetSfxLumpNum(sfxinfo_t *sound);
-int I_StartSound (int id, void *data, int vol, int sep, int pitch, int priority);
-void I_StopSound(int handle);
-int I_SoundIsPlaying(int handle);
-void I_UpdateSoundParams(int handle, int vol, int sep, int pitch);
-void I_sndArbitrateCards(void);
-void I_StartupSound (void);
-void I_ShutdownSound (void);
+// Init at program start...
+void I_StartupSound(void);
+
+// ... update sound buffer and audio device at runtime...
+void I_UpdateSound(void);
+
+// ... shut down and relase at program termination.
+void I_ShutdownSound(void);
+
+int	I_RegisterSong(void *data);
+void	I_UnRegisterSong(int handle);
+int	I_RegisterExternalSong(char *name);
+
+
+//
+//  SFX I/O
+//
+
+// Initialize channels?
 void I_SetChannels(int channels);
 
-#endif	/* __SOUND__ */
+// Get raw data lump index for sound descriptor.
+int I_GetSfxLumpNum (sfxinfo_t* sfxinfo );
 
+
+// Starts a sound in a particular sound channel.
+int
+I_StartSound
+( int		id,
+  void		*data,
+  int		vol,
+  int		sep,
+  int		pitch,
+  int		priority );
+
+
+// Stops a sound channel.
+void I_StopSound(int handle);
+
+// Called by S_*() functions
+//  to see if a channel is still playing.
+// Returns 0 if no longer playing, 1 if playing.
+int I_SoundIsPlaying(int handle);
+
+// Updates the volume, separation,
+//  and pitch of a sound channel.
+void
+I_UpdateSoundParams
+( int		handle,
+  int		vol,
+  int		sep,
+  int		pitch );
+
+
+//
+//  MUSIC I/O
+//
+void I_InitMusic(void);
+void I_ShutdownMusic(void);
+// Volume.
+void I_SetMusicVolume(int volume);
+// PAUSE game handling.
+void I_PauseSong(int handle);
+void I_ResumeSong(int handle);
+// Called by anything that wishes to start music.
+//  plays a song, and when the song is done,
+//  starts playing it again in an endless loop.
+// Horrible thing to do, considering.
+void I_PlaySong(int handle, int looping);
+// Stops a song over 3 seconds.
+void I_StopSong(int handle);
+// See above (register), then think backwards
+
+
+
+#endif
+//-----------------------------------------------------------------------------
+//
+// $Log:$
+//
+//-----------------------------------------------------------------------------

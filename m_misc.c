@@ -767,7 +767,7 @@ void M_ScreenShot (void)
 //
 // munge planar buffer to linear
 // 
-	linear = screen;
+	linear = screens;
 //
 // find a file name to save it to
 //

@@ -1432,7 +1432,7 @@ boolean P_GetMapFadeTable(int map)
 
 const char *P_GetMapSongLump(int map)
 {
-	if (!strcasecmp(MapInfo[QualifyMap(map)].songLump, DEFAULT_SONG_LUMP))
+	if (!cistrcmp(MapInfo[QualifyMap(map)].songLump, DEFAULT_SONG_LUMP))
 	{
 		return NULL;
 	}

@@ -533,7 +533,7 @@ int R_CheckTextureNumForName (const char *name)
 
 	for (i = 0; i < numtextures; i++)
 	{
-		if (!strncasecmp(textures[i]->name, name, 8))
+		if (!cistrncmp(textures[i]->name, name, 8))
 			return i;
 	}
 

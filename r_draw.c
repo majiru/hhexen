@@ -473,7 +473,7 @@ void R_InitBuffer (int width, int height)
 	else
 		viewwindowy = (SCREENHEIGHT - SBARHEIGHT - height) >> 1;
 	for (i = 0; i < height; i++)
-		ylookup[i] = screen + (i + viewwindowy)*SCREENWIDTH;
+		ylookup[i] = screens + (i + viewwindowy)*SCREENWIDTH;
 }
 
 
@@ -497,7 +497,7 @@ void R_DrawViewBorder (void)
 		return;
 
 	src = (byte *) W_CacheLumpName("F_022", PU_CACHE);
-	dest = screen;
+	dest = screens;
 
 	for (y = 0 ; y < SCREENHEIGHT - SBARHEIGHT; y++)
 	{
@@ -548,7 +548,7 @@ void R_DrawTopBorder (void)
 		return;
 
 	src = (byte *) W_CacheLumpName("F_022", PU_CACHE);
-	dest = screen;
+	dest = screens;
 
 	for (y = 0; y < 34; y++)
 	{

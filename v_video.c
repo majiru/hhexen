@@ -117,7 +117,7 @@ void V_Init(void)
 
 #else	/* RENDER3D */
 
-byte	*screen;
+byte	*screens;
 int	dirtybox[4];
 
 //---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ int	dirtybox[4];
 void V_Init(void)
 {
 	// I_AllocLow will put screen in low dos memory on PCs.
-	screen = I_AllocLow(SCREENWIDTH*SCREENHEIGHT);
+	screens = I_AllocLow(SCREENWIDTH*SCREENHEIGHT);
 }
 
 //---------------------------------------------------------------------------
@@ -159,7 +159,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 	}
 
 	col = 0;
-	desttop = screen + y*SCREENWIDTH + x;
+	desttop = screens + y*SCREENWIDTH + x;
 	w = SHORT(patch->width);
 
 	for ( ; col < w; x++, col++, desttop++)
@@ -250,7 +250,7 @@ void V_DrawFuzzPatch (int x, int y, patch_t *patch)
 	}
 
 	col = 0;
-	desttop = screen + y*SCREENWIDTH + x;
+	desttop = screens + y*SCREENWIDTH + x;
 	w = SHORT(patch->width);
 
 	for ( ; col < w; x++, col++, desttop++)
@@ -302,7 +302,7 @@ void V_DrawAltFuzzPatch (int x, int y, patch_t *patch)
 	}
 
 	col = 0;
-	desttop = screen + y*SCREENWIDTH + x;
+	desttop = screens + y*SCREENWIDTH + x;
 	w = SHORT(patch->width);
 
 	for ( ; col < w; x++, col++, desttop++)
@@ -354,8 +354,8 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 	}
 
 	col = 0;
-	desttop = screen+y*SCREENWIDTH+x;
-	desttop2 = screen+(y+2)*SCREENWIDTH+x+2;
+	desttop = screens+y*SCREENWIDTH+x;
+	desttop2 = screens+(y+2)*SCREENWIDTH+x+2;
 	w = SHORT(patch->width);
 
 	for ( ; col < w; x++, col++, desttop++, desttop2++)
@@ -388,7 +388,7 @@ void V_BlitToScreen (int x, int y, byte *buffer, int width, int height)
 	int	i, j;
 	byte	*dest;
 
-	dest = screen + x + SCREENWIDTH*y;
+	dest = screens + x + SCREENWIDTH*y;
 	for (i = 0; i < height; i++)
 	{
 		for (j = 0; j < width; j++)
@@ -407,7 +407,7 @@ void V_BlitToScreen (int x, int y, byte *buffer, int width, int height)
 
 void V_DrawRawScreen(byte *raw)
 {
-	memcpy(screen, raw, SCREENWIDTH*SCREENHEIGHT);
+	memcpy(screens, raw, SCREENWIDTH*SCREENHEIGHT);
 }
 
 #endif	/* ! RENDER3D */

@@ -5,6 +5,12 @@ TARG=hexen
 CFLAGS=-Fpw
 
 OFILES=\
+	i_system.$O \
+	i_video.$O \
+	i_net.$O \
+	i_sound.$O \
+	i_cdmus.$O \
+	i_main.$O \
 	am_map.$O \
 	a_action.$O \
 	ct_chat.$O \

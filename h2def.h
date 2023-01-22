@@ -301,7 +301,8 @@ typedef enum
 	ev_keydown,
 	ev_keyup,
 	ev_mouse,
-	ev_joystick
+	ev_joystick,
+	ev_char
 } evtype_t;
 
 typedef struct
@@ -963,7 +964,7 @@ extern	int		mouseSensitivity;
 
 extern	boolean		precache;	/* if true, load all graphics at level load */
 
-extern	byte		*screen;	/* off screen work buffer, from V_video.c */
+extern	byte		*screens;	/* off screen work buffer, from V_video.c */
 
 extern	boolean		singledemo;	/* quit after playing a demo from cmdline */
 

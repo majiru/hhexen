@@ -263,7 +263,7 @@ static void AM_initVariables(void)
 
 	automapactive = true;
 #ifndef RENDER3D
-	fb = screen;
+	fb = screens;
 #endif
 
 	f_oldloc.x = H2MAXINT;
