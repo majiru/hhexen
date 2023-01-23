@@ -11,11 +11,7 @@
 #ifndef __SAVE_DEFS
 #define __SAVE_DEFS
 
-#ifndef _DOSSAVE_COMPAT
-#define __compat_doshexen
-#else
-#define __compat_doshexen	__attribute__((__packed__))
-#endif
+#pragma pack on
 
 typedef struct
 {
@@ -69,7 +65,7 @@ typedef struct
 	short			tid;
 	byte			special;
 	byte			args[5];
-} __compat_doshexen save_mobj_t;
+} save_mobj_t;
 #if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
 /* make sure the struct is of 176 bytes size, so that all our
    saved games are uniform. */
@@ -128,7 +124,7 @@ typedef struct
 	int		morphTics;
 	unsigned int	jumpTics;
 	unsigned int	worldTimer;
-} __compat_doshexen save_player_t;
+} save_player_t;
 #if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
 /* make sure the struct is of 648 bytes size, so that all our saved
    games are uniform: Raven's DOS versions seem to have this struct
@@ -155,7 +151,7 @@ typedef struct
 	short		resetDelay;
 	short		resetDelayCount;
 	byte		textureChange;		/*  */
-} __compat_doshexen save_floormove_t;
+} save_floormove_t;
 #if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
 /* make sure the struct is of 72 bytes size, so that all our saved
    games are uniform. */
@@ -288,6 +284,8 @@ typedef struct
 	int		vars[MAX_ACS_SCRIPT_VARS];
 	int32_t		ip_idx;				/* byte		*ip; */
 } save_acs_t;
+
+#pragma pack off
 
 #endif	/* __SAVE_DEFS */
 

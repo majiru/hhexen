@@ -270,19 +270,19 @@ static thinkInfo_t ThinkerInfo[] =
 
 // CODE --------------------------------------------------------------------
 
-static inline byte GET_BYTE (void)
+static byte GET_BYTE (void)
 {
 	return *SavePtr++;
 }
 
-static inline int16_t GET_WORD (void)
+static int16_t GET_WORD (void)
 {
 	uint16_t val = READ_INT16(SavePtr);
 	INCR_INT16(SavePtr);
 	return (int16_t) val;
 }
 
-static inline int32_t GET_LONG (void)
+static int32_t GET_LONG (void)
 {
 	uint32_t val = READ_INT32(SavePtr);
 	INCR_INT32(SavePtr);

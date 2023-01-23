@@ -461,8 +461,11 @@ typedef enum
 	ASTE_TERMINATING
 } aste_t;
 
+#pragma pack on
+
 typedef struct acs_s acs_t;
 typedef struct acsInfo_s acsInfo_t;
+
 
 struct acsInfo_s
 {
@@ -494,6 +497,8 @@ typedef struct
 	int		script;		/* Script number on target map */
 	byte		args[4];	/* Padded to 4 for alignment */
 } acsstore_t;
+
+#pragma pack off
 
 void P_LoadACScripts(int lump);
 boolean P_StartACS(int number, int map, byte *args, mobj_t *activator, line_t *line, int side);
