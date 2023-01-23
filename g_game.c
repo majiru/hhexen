@@ -225,6 +225,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	if (alwaysrun && !demoplayback && !demorecording)
 		speed = !speed;
 	forward = side = look = arti = flyheight = 0;
+	USED(arti);
 
 //
 // use two stage accelerative turning on the keyboard and joystick
@@ -1320,6 +1321,7 @@ void G_StartNewGame(skill_t skill)
 {
 	int realMap;
 
+	USED(skill);
 	G_StartNewInit();
 	realMap = P_TranslateMap(1);
 	if (realMap == -1)
@@ -1725,6 +1727,7 @@ void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, const ch
 {
 	int		i;
 
+	USED(numplayers);
 	G_InitNew (skill, episode, map);
 	usergame = false;
 	snprintf (demoname, sizeof(demoname), "%s%s.lmp", basePath, name);

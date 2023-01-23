@@ -559,6 +559,7 @@ boolean P_TerminateACS(int number, int map)
 {
 	int infoIndex;
 
+	USED(map);
 	infoIndex = GetACSIndex(number);
 	if (infoIndex == -1)
 	{ // Script not found
@@ -583,6 +584,7 @@ boolean P_SuspendACS(int number, int map)
 {
 	int infoIndex;
 
+	USED(map);
 	infoIndex = GetACSIndex(number);
 	if (infoIndex == -1)
 	{ // Script not found

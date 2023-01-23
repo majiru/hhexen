@@ -153,8 +153,10 @@ result_e T_MovePlane(sector_t *sector,fixed_t speed, fixed_t dest,
 			else
 			{
 				lastpos = sector->ceilingheight;
+				USED(lastpos);
 				sector->ceilingheight += speed;
 				flag = P_ChangeSector(sector, crush);
+				USED(flag);
 				#if 0
 				if (flag == true)
 				{
@@ -269,7 +271,7 @@ void T_MoveFloor(floormove_t *floor)
 //
 //==================================================================
 
-int EV_DoFloor(line_t *line, byte *args, floor_e floortype)
+int EV_DoFloor(line_t*, byte *args, floor_e floortype)
 {
 	int		secnum;
 	int		rtn;
@@ -587,7 +589,7 @@ static void ProcessStairSector(sector_t *sec, int type, int height,
 // up or down.
 //==================================================================
 
-int EV_BuildStairs(line_t *line, byte *args, int direction,
+int EV_BuildStairs(line_t*, byte *args, int direction,
 					stairs_e stairsType)
 {
 	int		secnum;
@@ -672,7 +674,7 @@ void T_BuildPillar(pillar_t *pillar)
 //
 //=========================================================================
 
-int EV_BuildPillar(line_t *line, byte *args, boolean crush)
+int EV_BuildPillar(line_t*, byte *args, boolean crush)
 {
 	int secnum;
 	sector_t *sec;
@@ -739,7 +741,7 @@ int EV_BuildPillar(line_t *line, byte *args, boolean crush)
 //
 //=========================================================================
 
-int EV_OpenPillar(line_t *line, byte *args)
+int EV_OpenPillar(line_t*, byte *args)
 {
 	int secnum;
 	sector_t *sec;
@@ -805,7 +807,7 @@ int EV_OpenPillar(line_t *line, byte *args)
 //
 //=========================================================================
 
-int EV_FloorCrushStop(line_t *line, byte *args)
+int EV_FloorCrushStop(line_t*, byte*)
 {
 	thinker_t *think;
 	floormove_t *floor;

@@ -131,7 +131,7 @@ void T_VerticalDoor(vldoor_t *door)
 //
 //----------------------------------------------------------------------------
 
-int EV_DoDoor(line_t *line, byte *args, vldoor_e type)
+int EV_DoDoor(line_t*, byte *args, vldoor_e type)
 {
 	int secnum;
 	int retcode;
@@ -191,7 +191,7 @@ int EV_DoDoor(line_t *line, byte *args, vldoor_e type)
 //
 //==================================================================
 
-boolean EV_VerticalDoor(line_t *line, mobj_t *thing)
+boolean EV_VerticalDoor(line_t *line, mobj_t*)
 {
 	sector_t	*sec;
 	vldoor_t	*door;

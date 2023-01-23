@@ -451,6 +451,7 @@ static boolean EV_LineSearchForPuzzleItem(line_t *line, byte *args, mobj_t *mo)
 	int i;
 	artitype_t type, arti;
 
+	USED(args);
 	if (!mo)
 		return false;
 	player = mo->player;
@@ -868,7 +869,9 @@ boolean P_ActivateLine(line_t *line, mobj_t *mo, int side, int activationType)
 			return false;		// never open secret doors
 	}
 	repeat = line->flags & ML_REPEAT_SPECIAL;
+	USED(repeat);
 	buttonSuccess = false;
+	USED(buttonSuccess);
 
 	buttonSuccess = P_ExecuteLineSpecial(line->special, &line->arg1, line, side, mo);
 	if (!repeat && buttonSuccess)

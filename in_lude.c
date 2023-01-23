@@ -131,7 +131,7 @@ static void Stop(void)
 //
 //========================================================================
 
-void WaitStop(void)
+static void WaitStop(void)
 {
 	if (!--cnt)
 	{

@@ -542,7 +542,7 @@ static void D_ArbitrateNetStart (void)
 
 	do
 	{
-		i = 0;
+		//i = 0;
 
 		CheckAbort();
 		while (HGetPacket())

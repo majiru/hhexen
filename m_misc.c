@@ -250,7 +250,6 @@ int M_ReadFileCLib(char const *name, void **buffer)
 static int __ReadFile(char const *name, void **buffer, int mallocType)
 {
 	int handle, count, length;
-	struct stat fileinfo;
 	void *buf;
 	Dir *d;
 

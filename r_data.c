@@ -118,6 +118,7 @@ static void R_GenerateComposite (int texnum)
 // composite the columns together
 //
 	patch = texture->patches;
+	USED(patch);
 
 	for (i = 0, patch = texture->patches; i < texture->patchcount; i++, patch++)
 	{
@@ -180,6 +181,7 @@ static void R_GenerateLookup (int texnum)
 	patchcount = (byte *)malloc (texture->width);
 	memset (patchcount, 0, texture->width);
 	patch = texture->patches;
+	USED(patch);
 
 	for (i = 0, patch = texture->patches; i < texture->patchcount; i++, patch++)
 	{

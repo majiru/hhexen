@@ -673,7 +673,8 @@ static void P_MonsterFallingDamage(mobj_t *mo)
 	{
 		damage = ((mom - (23*FRACUNIT) )*6)>>FRACBITS;
 	}
-	damage = 10000;	// always kill 'em
+	USED(damage);
+	damage = 10000;	// always kill 'em <- sure I guess why not
 	P_DamageMobj(mo, NULL, NULL, damage);
 }
 
@@ -1010,7 +1011,7 @@ void P_BlasterMobjThinker(mobj_t *mobj)
 //
 //===========================================================================
 
-static void PlayerLandedOnThing(mobj_t *mo, mobj_t *onmobj)
+static void PlayerLandedOnThing(mobj_t *mo, mobj_t*)
 {
 	mo->player->deltaviewheight = mo->momz>>3;
 	if (mo->momz < -23*FRACUNIT)

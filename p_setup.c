@@ -996,7 +996,7 @@ static void P_SkyFix(void)
 =================
 */
 
-void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
+void P_SetupLevel(int episode, int map, int playermask, skill_t)
 {
 	int		i;
 	int		parm;
@@ -1005,6 +1005,8 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
 	int		lumpnum;
 	mobj_t		*mobj;
 
+	USED(playermask);
+	USED(episode);
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
 		players[i].killcount = players[i].secretcount = players[i].itemcount = 0;

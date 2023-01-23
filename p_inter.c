@@ -817,7 +817,7 @@ static void TryPickupArtifact(player_t *player, artitype_t artifactType,
 //
 //---------------------------------------------------------------------------
 
-boolean P_GiveArtifact(player_t *player, artitype_t arti, mobj_t *mo)
+boolean P_GiveArtifact(player_t *player, artitype_t arti, mobj_t*)
 {
 	int i;
 	int j;

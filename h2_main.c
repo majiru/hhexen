@@ -411,6 +411,7 @@ static void WarpCheck(void)
 
 static void ExecOptionSKILL(const char **args, int tag)
 {
+	USED(tag);
 	startskill = args[1][0] - '1';
 	autostart = true;
 }
@@ -425,6 +426,7 @@ static void ExecOptionFILE(const char **args, int tag)
 {
 	int p;
 
+	USED(tag); USED(args);
 	p = M_CheckParm("-file");
 	while (++p != myargc && myargv[p][0] != '-')
 	{
@@ -443,6 +445,7 @@ static void ExecOptionPLAYDEMO(const char **args, int tag)
 {
 	char file[256];
 
+	USED(tag);
 	snprintf(file, sizeof(file), "%s.lmp", args[1]);
 	AddWADFile(file);
 	ST_Message("Playing demo %s.lmp.\n", args[1]);
@@ -456,6 +459,7 @@ static void ExecOptionPLAYDEMO(const char **args, int tag)
 
 static void ExecOptionSCRIPTS(const char **args, int tag)
 {
+	USED(tag);
 	sc_FileScripts = true;
 	sc_ScriptsDir = args[1];
 }
@@ -469,6 +473,8 @@ static void ExecOptionSCRIPTS(const char **args, int tag)
 static void ExecOptionDEVMAPS(const char **args, int tag)
 {
 	char *ptr;
+
+	USED(tag);
 	DevMaps = true;
 	ST_Message("Map development mode enabled:\n");
 	ST_Message("[config    ] = %s\n", args[1]);
@@ -539,6 +545,7 @@ static void ExecOptionMAXZONE(const char **args, int tag)
 {
 	int size;
 
+	USED(tag);
 	size = (int) superatol(args[1]);
 	if (size < MINIMUM_HEAP_SIZE)
 		size = MINIMUM_HEAP_SIZE;

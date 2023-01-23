@@ -1139,6 +1139,7 @@ void A_SoAExplode(mobj_t *actor)
 	mobj_t *mo;
 	int i;
 
+	mo = nil;
 	for (i = 0; i < 10; i++)
 	{
 		mo = P_SpawnMobj(actor->x+((P_Random()-128)<<12), 

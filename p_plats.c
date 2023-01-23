@@ -96,7 +96,7 @@ void T_PlatRaise(plat_t *plat)
 //
 //==================================================================
 
-int EV_DoPlat(line_t *line, byte *args, plattype_e type, int amount)
+int EV_DoPlat(line_t*, byte *args, plattype_e type, int amount)
 {
 	plat_t		*plat;
 	int		secnum;
@@ -105,6 +105,7 @@ int EV_DoPlat(line_t *line, byte *args, plattype_e type, int amount)
 
 	secnum = -1;
 	rtn = 0;
+	USED(amount);
 
 	/*
 	//
@@ -209,7 +210,7 @@ void P_ActivateInStasis(int tag)
 }
 #endif
 
-void EV_StopPlat(line_t *line, byte *args)
+void EV_StopPlat(line_t*, byte *args)
 {
 	int		i;
 

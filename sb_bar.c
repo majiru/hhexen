@@ -909,6 +909,7 @@ static void DrawSoundInfo(void)
 		snprintf(text, sizeof(text), "%d", c->distance);
 		MN_DrTextA(text, xPos[x++], y);
 	}
+	USED(x);
 	UpdateState |= I_FULLSCRN;
 	BorderNeedRefresh = true;
 }
@@ -1155,7 +1156,6 @@ void SB_PaletteFlash(boolean forceChange)
 		CPlayer = &players[consoleplayer];
 		if (CPlayer->poisoncount)
 		{
-			palette = 0;
 			palette = (CPlayer->poisoncount + 7)>>3;
 			if (palette >= NUMPOISONPALS)
 			{
@@ -1207,7 +1207,7 @@ void SB_PaletteFlash(boolean forceChange)
 //
 //==========================================================================
 
-void DrawCommonBar(void)
+static void DrawCommonBar(void)
 {
 	int healthPos;
 
@@ -1243,7 +1243,7 @@ void DrawCommonBar(void)
 //
 //==========================================================================
 
-void DrawMainBar(void)
+static void DrawMainBar(void)
 {
 	PATCH_REF manaPatch1		= INVALID_PATCH;
 	PATCH_REF manaPatch2		= INVALID_PATCH;
@@ -1251,6 +1251,7 @@ void DrawMainBar(void)
 	PATCH_REF manaVialPatch2	= INVALID_PATCH;
 	int				i, temp;
 
+	USED(manaVialPatch2);
 	// Ready artifact
 	if (ArtifactFlash)
 	{
@@ -1484,7 +1485,7 @@ void DrawMainBar(void)
 //
 //==========================================================================
 
-void DrawInventoryBar(void)
+static void DrawInventoryBar(void)
 {
 	int i;
 	int x;
@@ -1522,7 +1523,7 @@ void DrawInventoryBar(void)
 //
 //==========================================================================
 
-void DrawKeyBar(void)
+static void DrawKeyBar(void)
 {
 	int i;
 	int xPosition;
@@ -1622,7 +1623,7 @@ static void DrawWeaponPieces(void)
 //
 //==========================================================================
 
-void DrawFullScreenStuff(void)
+static void DrawFullScreenStuff(void)
 {
 	int i;
 	int x;
@@ -1854,6 +1855,7 @@ static boolean CheatAddKey(Cheat_t *cheat, byte key, boolean *eat)
 
 static void CheatGodFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	player->cheats ^= CF_GODMODE;
 	if (player->cheats & CF_GODMODE)
 	{
@@ -1868,6 +1870,7 @@ static void CheatGodFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatNoClipFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	player->cheats ^= CF_NOCLIP;
 	if (player->cheats & CF_NOCLIP)
 	{
@@ -1884,6 +1887,7 @@ static void CheatWeaponsFunc(player_t *player, Cheat_t *cheat)
 	int i;
 	//extern boolean *WeaponInShareware;
 
+	USED(cheat);
 	for (i = 0; i < NUMARMOR; i++)
 	{
 		player->armorpoints[i] = ArmorIncrement[player->playerclass][i];
@@ -1901,6 +1905,7 @@ static void CheatWeaponsFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatHealthFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	if (player->morphTics)
 	{
 		player->health = player->mo->health = MAXMORPHHEALTH;
@@ -1914,12 +1919,14 @@ static void CheatHealthFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatKeysFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	player->keys = 2047;
 	P_SetMessage(player, TXT_CHEATKEYS, true);
 }
 
 static void CheatSoundFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	DebugSound = !DebugSound;
 	if (DebugSound)
 	{
@@ -1935,6 +1942,7 @@ static void CheatTickerFunc(player_t *player, Cheat_t *cheat)
 {
 	extern int DisplayTicker;
 
+	USED(cheat);
 	DisplayTicker = !DisplayTicker;
 	if (DisplayTicker)
 	{
@@ -1951,6 +1959,7 @@ static void CheatArtifactAllFunc(player_t *player, Cheat_t *cheat)
 	int i;
 	int j;
 
+	USED(cheat);
 	for (i = arti_none + 1; i < arti_firstpuzzitem; i++)
 	{
 		for (j = 0; j < 25; j++)
@@ -1965,6 +1974,7 @@ static void CheatPuzzleFunc(player_t *player, Cheat_t *cheat)
 {
 	int i;
 
+	USED(cheat);
 	for (i = arti_firstpuzzitem; i < NUMARTIFACTS; i++)
 	{
 		P_GiveArtifact(player, i, NULL);
@@ -1974,6 +1984,7 @@ static void CheatPuzzleFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatInitFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	G_DeferedInitNew(gameskill, gameepisode, gamemap);
 	P_SetMessage(player, TXT_CHEATWARP, true);
 }
@@ -2034,6 +2045,7 @@ static void CheatWarpFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatPigFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	if (player->morphTics)
 	{
 		P_UndoPlayerMorph(player);
@@ -2050,6 +2062,7 @@ static void CheatMassacreFunc(player_t *player, Cheat_t *cheat)
 	int count;
 	char buffer[80];
 
+	USED(cheat);
 	count = P_Massacre();
 	snprintf(buffer, sizeof(buffer), "%d MONSTERS KILLED\n", count);
 	P_SetMessage(player, buffer, true);
@@ -2058,6 +2071,8 @@ static void CheatMassacreFunc(player_t *player, Cheat_t *cheat)
 static void CheatIDKFAFunc(player_t *player, Cheat_t *cheat)
 {
 	int i;
+
+	USED(cheat);
 	if (player->morphTics)
 	{
 		return;
@@ -2072,22 +2087,26 @@ static void CheatIDKFAFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatQuickenFunc1(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_SetMessage(player, "TRYING TO CHEAT?  THAT'S ONE....", true);
 }
 
 static void CheatQuickenFunc2(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_SetMessage(player, "THAT'S TWO....", true);
 }
 
 static void CheatQuickenFunc3(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_DamageMobj(player->mo, NULL, player->mo, 10000);
 	P_SetMessage(player, "THAT'S THREE!  TIME TO DIE.", true);
 }
 
 static void CheatClassFunc1(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 /* P_SetMessage isn't variably arg'ed: set the messages by hand: */
 #ifdef ASSASSIN
 	P_SetMessage(player, "ENTER NEW PLAYER CLASS (0 - 3)", true);
@@ -2125,12 +2144,14 @@ static void CheatClassFunc2(player_t *player, Cheat_t *cheat)
 
 static void CheatVersionFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_SetMessage(player, VERSIONTEXT, true);
 }
 
 static void CheatDebugFunc(player_t *player, Cheat_t *cheat)
 {
 	char textBuffer[50];
+	USED(cheat);
 	snprintf(textBuffer, sizeof(textBuffer), "MAP %d (%d)  X:%5d  Y:%5d  Z:%5d",
 				P_GetMapWarpTrans(gamemap),
 				gamemap,
@@ -2142,11 +2163,13 @@ static void CheatDebugFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatScriptFunc1(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_SetMessage(player, "RUN WHICH SCRIPT(01-99)?", true);
 }
 
 static void CheatScriptFunc2(player_t *player, Cheat_t *cheat)
 {
+	USED(cheat);
 	P_SetMessage(player, "RUN WHICH SCRIPT(01-99)?", true);
 }
 
@@ -2177,6 +2200,8 @@ extern int cheating;
 
 static void CheatRevealFunc(player_t *player, Cheat_t *cheat)
 {
+	USED(player);
+	USED(cheat);
 	cheating = (cheating + 1) % 3;
 }
 
@@ -2194,6 +2219,7 @@ static void CheatTrackFunc1(player_t *player, Cheat_t *cheat)
 	{
 		return;
 	}
+	USED(cheat);
 	snprintf(buffer, sizeof(buffer), "ENTER DESIRED CD TRACK (%.2d - %.2d):\n",
 					  I_CDMusFirstTrack(), I_CDMusLastTrack());
 	P_SetMessage(player, buffer, true);

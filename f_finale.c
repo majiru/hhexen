@@ -111,6 +111,7 @@ void F_StartFinale (void)
 
 boolean F_Responder(event_t *event)
 {
+	USED(event);
 	return false;
 }
 

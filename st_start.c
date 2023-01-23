@@ -175,6 +175,7 @@ void ST_Done(void)
 
 void ST_UpdateNotches(int notchPosition)
 {
+	USED(notchPosition);
 #if defined(__WATCOMC__) || defined(__DJGPP__) || defined(__DOS__)
 	int x = ST_PROGRESS_X + notchPosition*ST_NOTCH_WIDTH;
 	int y = ST_PROGRESS_Y;
@@ -191,6 +192,7 @@ void ST_UpdateNotches(int notchPosition)
 
 void ST_UpdateNetNotches(int notchPosition)
 {
+	USED(notchPosition);
 #if defined(__WATCOMC__) || defined(__DJGPP__) || defined(__DOS__)
 	int x = ST_NETPROGRESS_X + notchPosition*ST_NETNOTCH_WIDTH;
 	int y = ST_NETPROGRESS_Y;

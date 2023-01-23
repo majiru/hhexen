@@ -598,6 +598,7 @@ void AM_Ticker (void)
 
 static void AM_clearFB(int color)
 {
+	USED(color);
 #ifdef RENDER3D
 	float scaler;
 	int lump;
@@ -1350,6 +1351,7 @@ static void AM_drawThings(int colors, int colorrange)
 	int i;
 	mobj_t *t;
 
+	USED(colorrange);
 	for (i = 0; i < numsectors; i++)
 	{
 		t = sectors[i].thinglist;

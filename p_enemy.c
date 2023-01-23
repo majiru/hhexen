@@ -575,7 +575,6 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
 		actor->target = player->mo;
 		return true;
 	}
-	return false;
 }
 
 /*
@@ -1133,7 +1132,7 @@ void A_MinotaurRoam(mobj_t *actor)
 
 void A_MinotaurLook(mobj_t *actor)
 {
-	mobj_t *mo = NULL;
+	mobj_t *mo;
 	player_t *player;
 	thinker_t *think;
 	fixed_t dist;

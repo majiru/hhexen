@@ -581,7 +581,7 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
 //
 //---------------------------------------------------------------------------
 
-void A_ReFire(player_t *player, pspdef_t *psp)
+void A_ReFire(player_t *player, pspdef_t*)
 {
 	if ((player->cmd.buttons&BT_ATTACK)
 		&& player->pendingweapon == WP_NOCHANGE && player->health)
@@ -732,7 +732,7 @@ static void AdjustPlayerAngle(mobj_t *pmo)
 //
 //============================================================================
 
-void A_SnoutAttack(player_t *player, pspdef_t *psp)
+void A_SnoutAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	int damage;
@@ -765,7 +765,7 @@ void A_SnoutAttack(player_t *player, pspdef_t *psp)
 
 #define HAMMER_RANGE	(MELEERANGE+MELEERANGE/2)
 
-void A_FHammerAttack(player_t *player, pspdef_t *psp)
+void A_FHammerAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	mobj_t *pmo = player->mo;
@@ -834,7 +834,7 @@ hammerdone:
 //
 //============================================================================
 
-void A_FHammerThrow(player_t *player, pspdef_t *psp)
+void A_FHammerThrow(player_t *player, pspdef_t*)
 {
 	mobj_t *mo;
 
@@ -856,7 +856,7 @@ void A_FHammerThrow(player_t *player, pspdef_t *psp)
 //
 //============================================================================
 
-void A_FSwordAttack(player_t *player, pspdef_t *psp)
+void A_FSwordAttack(player_t *player, pspdef_t*)
 {
 	mobj_t *pmo;
 
@@ -914,7 +914,7 @@ void A_FSwordFlames(mobj_t *actor)
 //
 //============================================================================
 
-void A_MWandAttack(player_t *player, pspdef_t *psp)
+void A_MWandAttack(player_t *player, pspdef_t*)
 {
 	mobj_t *mo;
 
@@ -1110,7 +1110,7 @@ void A_MLightningAttack2(mobj_t *actor)
 //
 //============================================================================
 
-void A_MLightningAttack(player_t *player, pspdef_t *psp)
+void A_MLightningAttack(player_t *player, pspdef_t*)
 {
 	A_MLightningAttack2(player->mo);
 	player->mana[MANA_2] -= WeaponManaUse[player->playerclass][player->readyweapon];
@@ -1203,7 +1203,7 @@ static void MStaffSpawn(mobj_t *pmo, angle_t angle)
 //
 //============================================================================
 
-void A_MStaffAttack(player_t *player, pspdef_t *psp)
+void A_MStaffAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	mobj_t *pmo;
@@ -1332,7 +1332,7 @@ void A_MStaffAttack2(mobj_t *actor)
 //
 //============================================================================
 
-void A_FPunchAttack(player_t *player, pspdef_t *psp)
+void A_FPunchAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	int damage;
@@ -1410,7 +1410,7 @@ punchdone:
 
 #define AXERANGE	2.25*MELEERANGE
 
-void A_FAxeAttack(player_t *player, pspdef_t *psp)
+void A_FAxeAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	mobj_t *pmo = player->mo;
@@ -1489,7 +1489,7 @@ axedone:
 //
 //===========================================================================
 
-void A_CMaceAttack(player_t *player, pspdef_t *psp)
+void A_CMaceAttack(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	int damage;
@@ -1538,7 +1538,7 @@ macedone:
 //
 //============================================================================
 
-void A_CStaffCheck(player_t *player, pspdef_t *psp)
+void A_CStaffCheck(player_t *player, pspdef_t*)
 {
 	mobj_t *pmo;
 	int damage;
@@ -1598,7 +1598,7 @@ void A_CStaffCheck(player_t *player, pspdef_t *psp)
 //
 //============================================================================
 
-void A_CStaffAttack(player_t *player, pspdef_t *psp)
+void A_CStaffAttack(player_t *player, pspdef_t*)
 {
 	mobj_t *mo;
 	mobj_t *pmo;
@@ -1647,7 +1647,7 @@ void A_CStaffMissileSlither(mobj_t *actor)
 //
 //============================================================================
 
-void A_CStaffInitBlink(player_t *player, pspdef_t *psp)
+void A_CStaffInitBlink(player_t *player, pspdef_t*)
 {
 	player->mo->special1 = (P_Random()>>1) + 20;
 }
@@ -1658,7 +1658,7 @@ void A_CStaffInitBlink(player_t *player, pspdef_t *psp)
 //
 //============================================================================
 
-void A_CStaffCheckBlink(player_t *player, pspdef_t *psp)
+void A_CStaffCheckBlink(player_t *player, pspdef_t*)
 {
 	if (!--player->mo->special1)
 	{
@@ -1676,7 +1676,7 @@ void A_CStaffCheckBlink(player_t *player, pspdef_t *psp)
 #define FLAMESPEED	(0.45*FRACUNIT)
 #define CFLAMERANGE	(12*64*FRACUNIT)
 
-void A_CFlameAttack(player_t *player, pspdef_t *psp)
+void A_CFlameAttack(player_t *player, pspdef_t*)
 {
 	mobj_t *mo;
 
@@ -1943,7 +1943,7 @@ void A_CHolyAttack2(mobj_t *actor)
 //
 //============================================================================
 
-void A_CHolyAttack(player_t *player, pspdef_t *psp)
+void A_CHolyAttack(player_t *player, pspdef_t*)
 {
 	player->mana[MANA_1] -= WeaponManaUse[player->playerclass][player->readyweapon];
 	player->mana[MANA_2] -= WeaponManaUse[player->playerclass][player->readyweapon];
@@ -2265,7 +2265,7 @@ void A_CHolySpawnPuff(mobj_t *actor)
 #define SHARDSPAWN_UP		4
 #define SHARDSPAWN_DOWN		8
 
-void A_FireConePL1(player_t *player, pspdef_t *psp)
+void A_FireConePL1(player_t *player, pspdef_t*)
 {
 	angle_t angle;
 	int damage;
@@ -2283,7 +2283,7 @@ void A_FireConePL1(player_t *player, pspdef_t *psp)
 	{
 		angle = pmo->angle + i*(ANG45/16);
 		slope = P_AimLineAttack(pmo, angle, MELEERANGE);
-		(void) slope; /* variable set but not used */
+		USED(slope); /* variable set but not used */
 		if (linetarget)
 		{
 			pmo->flags2 |= MF2_ICEDAMAGE;
@@ -2409,7 +2409,7 @@ void A_FloatPuff(mobj_t *puff)
 }
 */
 
-void A_Light0(player_t *player, pspdef_t *psp)
+void A_Light0(player_t *player, pspdef_t*)
 {
 	player->extralight = 0;
 }
@@ -2479,6 +2479,7 @@ void P_MovePsprites(player_t *player)
 				}
 			}
 		}
+		USED(state);
 	}
 	player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
 	player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;

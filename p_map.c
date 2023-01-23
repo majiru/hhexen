@@ -1566,6 +1566,7 @@ void P_BounceWall(mobj_t *mo)
 ////		I_Error ("SlideLine: ang>ANG180");
 
 	lineangle >>= ANGLETOFINESHIFT;
+	USED(lineangle);
 	deltaangle >>= ANGLETOFINESHIFT;
 
 	movelen = P_AproxDistance(mo->momx, mo->momy);

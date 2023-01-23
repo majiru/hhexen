@@ -259,8 +259,6 @@ angle_t R_PointToAngle (fixed_t x, fixed_t y)
 				return ANG270 - 1 - tantoangle[SlopeDiv(x,y)];	// octant 5
 		}
 	}
-
-	return 0;
 }
 
 
@@ -478,6 +476,7 @@ void R_InitTextureMapping (void)
 	{
 		t = FixedMul (finetangent[i], focallength);
 		t = centerx - t;
+		USED(t);
 		if (viewangletox[i] == -1)
 			viewangletox[i] = 0;
 		else if (viewangletox[i] == viewwidth + 1)

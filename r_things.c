@@ -380,6 +380,8 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 	patch_t		*patch;
 	fixed_t		baseclip;
 
+	USED(x1);
+	USED(x2);
 	patch = (patch_t *) W_CacheLumpNum(vis->patch + firstspritelump, PU_CACHE);
 
 	dc_colormap = vis->colormap;
@@ -486,6 +488,8 @@ void R_ProjectSprite (mobj_t *thing)
 	float		sinrv, cosrv, thangle;	// rv = real value
 #endif
 
+	USED(x1);
+	USED(x2);
 	if (thing->flags2 & MF2_DONTDRAW)
 	{ // Never make a vissprite when MF2_DONTDRAW is flagged.
 		return;

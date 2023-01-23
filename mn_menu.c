@@ -1183,6 +1183,7 @@ static void DrawOptions3Menu(void)
 
 static void SCQuitGame(int option)
 {
+	USED(option);
 	MenuActive = false;
 	askforquit = true;
 	typeofask = 1; //quit game
@@ -1201,6 +1202,7 @@ static void SCQuitGame(int option)
 
 static void SCEndGame(int option)
 {
+	USED(option);
 	if (demoplayback)
 	{
 		return;
@@ -1225,6 +1227,7 @@ static void SCEndGame(int option)
 
 static void SCMessages(int option)
 {
+	USED(option);
 	if (messageson)
 	{
 		messageson = 0;
@@ -1519,6 +1522,7 @@ static void SCScreenSize(int option)
 
 static void SCInfo(int option)
 {
+	USED(option);
 	InfoType = 1;
 	S_StartSound(NULL, SFX_DOOR_LIGHT_CLOSE);
 	if (!netgame && !demoplayback)
@@ -1535,6 +1539,7 @@ static void SCInfo(int option)
 
 static void SCSetKey(int option)
 {
+	USED(option);
 	askforkey = true;
 	keyaskedfor = option;
 	if (!netgame && !demoplayback)
@@ -1562,6 +1567,7 @@ static void SCMouselook(int option)
 
 static void SCAlwaysRun(int option)
 {
+	USED(option);
 	if (alwaysrun)
 		alwaysrun = 0;
 	else	alwaysrun = 1;
@@ -1569,6 +1575,7 @@ static void SCAlwaysRun(int option)
 
 static void SCCDAudio(int option)
 {
+	USED(option);
 	if (cdaudio)
 	{
 		cdaudio = 0;
@@ -2140,7 +2147,6 @@ boolean MN_Responder(event_t *event)
 		}
 		return true;
 	}
-	return false;
 }
 
 //---------------------------------------------------------------------------
@@ -2197,7 +2203,7 @@ void MN_DeactivateMenu(void)
 //
 //---------------------------------------------------------------------------
 
-void MN_DrawInfo(void)
+static void MN_DrawInfo(void)
 {
 	V_SetPaletteBase();
 	V_DrawRawScreen((BYTE_REF) WR_CacheLumpNum(W_GetNumForName("TITLE")+InfoType, PU_CACHE));

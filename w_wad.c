@@ -744,7 +744,7 @@ void W_CheckWADFiles (void)
 		ST_Message ("\nIt appears that you are using a 4-player-only Version 1.0 hexen.wad.\n");
 		ST_Message ("Running HHexen without a Version 1.1 wadfile can cause many problems.\n");
 		ST_Message ("\nPress <ENTER> to continue.\n");
-		getchar();
+		USED(getchar());
 	}
 #endif
 }

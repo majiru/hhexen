@@ -5,6 +5,7 @@
 
 #include "i_system.h"
 #include "i_video.h"
+#include "i_sound.h"
 
 //#include "g_game.h"
 //#include "m_misc.h"
@@ -34,6 +35,8 @@ ticcmd_t* I_BaseTiccmd (void)
 {
 	return &emptycmd;
 }
+
+extern void G_CheckDemoStatus(void);
 
 void I_Quit (void)
 {
