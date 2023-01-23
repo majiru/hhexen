@@ -38,7 +38,7 @@ void I_UpdateSound(void);
 // ... shut down and relase at program termination.
 void I_ShutdownSound(void);
 
-int	I_RegisterSong(void *data);
+int	I_RegisterSong(void *data, int siz);
 void	I_UnRegisterSong(int handle);
 int	I_RegisterExternalSong(char *name);
 

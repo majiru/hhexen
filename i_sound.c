@@ -81,6 +81,10 @@ static int audiopid = -1;
 
 static QLock audiolk;
 
+boolean mus_paused = false;
+
+static int mpfd[2] = {-1, -1};
+
 static void audioproc(void)
 {
 	Channel* chan;
@@ -97,6 +101,11 @@ static void audioproc(void)
 	cend = channel + CHAN_COUNT;
 
 	for(;;){
+		memset(buf, 0, sizeof buf);
+		if(mpfd[0]>=0 && !mus_paused && readn(mpfd[0], buf, sizeof buf) < 0){
+			fprint(2, "I_UpdateSound: disabling music: %r\n");
+			I_ShutdownMusic();
+		}
 		begin = (SAMPLE_TYPE *) buf;
 		while (begin < end){
 			// Mix all the channels together.
@@ -137,8 +146,8 @@ static void audioproc(void)
 					dr = 0x7fff;
 				else if (dr < -0x8000)
 					dr = -0x8000;
-				*begin++ = dl;
-				*begin++ = dr;
+				*begin++ += dl;
+				*begin++ += dr;
 			}
 		}
 		write(audiofd, buf, BUF_LEN);
@@ -324,6 +333,7 @@ void I_ShutdownSound (void)
 		postnote(PNPROC, audiopid, "shutdown");
 		audiopid = -1;
 	}
+	I_ShutdownMusic();
 }
 
 void I_SetChannels(int channels)
@@ -368,10 +378,52 @@ void I_SetChannels(int channels)
  *	SONG API
  */
 
-int I_RegisterSong(void *data)
+static int didgen = 0;
+
+static void genmidi(void)
 {
-	USED(data);
-	return 0;
+	int fd, n, sz;
+	char name[64];
+	uchar *gm;
+
+	n = W_GetNumForName("GENMIDI");
+	sz = W_LumpLength(n);
+	gm = (uchar *)W_CacheLumpNum(n, PU_STATIC);
+	snprint(name, sizeof(name), "/tmp/genmidi.%d", getpid());
+	if((fd = create(name, ORDWR|ORCLOSE, 0666)) < 0)
+		sysfatal("create: %r");
+	if(write(fd, gm, sz) != sz)
+			sysfatal("write: %r");
+	Z_Free(gm);
+}
+
+void I_ShutdownMusic(void)
+{
+	if(mpfd[0] >= 0){
+		close(mpfd[0]);
+		mpfd[0] = -1;
+		waitpid();
+	}
+}
+
+
+/* In theory this allows register step allows 
+ * the use of external files in place of internal ones. */
+static void *currentsong = nil;
+static int currentsize = 0;
+
+int I_RegisterSong(void *data, int siz)
+{
+	if(!didgen){
+		genmidi();
+		didgen++;
+	}
+	if(currentsong != nil)
+		return 0;
+
+	currentsong = data;
+	currentsize = siz;
+	return 1;
 }
 
 int I_RegisterExternalSong(const char *nm)
@@ -383,16 +435,21 @@ int I_RegisterExternalSong(const char *nm)
 void I_UnRegisterSong(int handle)
 {
 	USED(handle);
+	currentsong = nil;
 }
 
 void I_PauseSong(int handle)
 {
-	USED(handle);
+	if(handle <= 0)
+		return;
+	mus_paused = true;
 }
 
 void I_ResumeSong(int handle)
 {
-	USED(handle);
+	if(handle <= 0)
+		return;
+	mus_paused = false;
 }
 
 void I_SetMusicVolume(int volume)
@@ -409,11 +466,48 @@ int I_QrySongPlaying(int handle)
 // Stops a song.  MUST be called before I_UnregisterSong().
 void I_StopSong(int handle)
 {
-	USED(handle);
+	if(handle <= 0)
+		return;
+	I_ShutdownMusic();
 }
 
-void I_PlaySong(int handle, boolean looping)
+void I_PlaySong(int handle, boolean loop)
 {
-	USED(handle); USED(looping);
+	char name[64];
+	int n;
+
+	if(M_CheckParm("-nomusic") || audiofd < 0 || handle <= 0)
+		return;
+
+	I_ShutdownMusic();
+	if(pipe(mpfd) < 0)
+		return;
+	switch(rfork(RFPROC|RFFDG|RFNAMEG)){
+	case -1:
+		fprint(2, "I_PlaySong: %r\n");
+		break;
+	case 0:
+		dup(mpfd[1], 1);
+		for(n=3; n<20; n++) close(n);
+		close(0);
+		snprint(name, sizeof(name), "/tmp/hexen.%d", getpid());
+		if(create(name, ORDWR|ORCLOSE, 0666) != 0)
+			sysfatal("create: %r");
+		if(write(0, currentsong, currentsize) != currentsize)
+			sysfatal("write: %r");
+		if(seek(0, 0, 0) != 0)
+			sysfatal("seek: %r");
+		if(bind("/fd/1", "/dev/audio", MREPL) == -1)
+			sysfatal("bind: %r");
+		while(loop && fork() > 0){
+			if(waitpid() < 0 || write(1, "", 0) < 0)
+				exits(nil);
+		}
+		execl("/bin/dmus", "dmus", name, nil);
+		execl("/bin/play", "play", name, nil);
+		sysfatal("execl: %r");
+	default:
+		close(mpfd[1]);
+	}
 }
 
