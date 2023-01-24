@@ -77,7 +77,6 @@ static int	steptable[256];		/* Pitch to stepping lookup */
 #define BUF_LEN		(256 * 2 * 4)
 
 static int audiofd;
-static int audiopid = -1;
 
 static QLock audiolk;
 
@@ -93,13 +92,14 @@ static void audioproc(void)
 	SAMPLE_TYPE *begin;
 	SAMPLE_TYPE *end;
 	unsigned int sample;
-	register int dl;
-	register int dr;
+	register int dl, ml;
+	register int dr, mr;
 	int i;
 
 	end = (SAMPLE_TYPE *) (buf + BUF_LEN);
 	cend = channel + CHAN_COUNT;
 
+	procsetname("hexen audioproc");
 	for(;;){
 		memset(buf, 0, sizeof buf);
 		if(mpfd[0]>=0 && !mus_paused && readn(mpfd[0], buf, sizeof buf) < 0){
@@ -138,16 +138,19 @@ static void audioproc(void)
 			}
 			qunlock(&audiolk);
 			for(i=0; i < TARGET_RATE/SAMPLE_RATE; i++){
-				if (dl > 0x7fff)
-					dl = 0x7fff;
-				else if (dl < -0x8000)
-					dl = -0x8000;
-				if (dr > 0x7fff)
-					dr = 0x7fff;
-				else if (dr < -0x8000)
-					dr = -0x8000;
-				*begin++ += dl;
-				*begin++ += dr;
+				ml = dl + *begin;
+				if (ml > 0x7fff)
+					ml = 0x7fff;
+				else if (ml < -0x8000)
+					ml = -0x8000;
+				*begin++ = ml;
+
+				mr = dr + *begin;
+				if (mr > 0x7fff)
+					mr = 0x7fff;
+				else if (mr < -0x8000)
+					mr = -0x8000;
+				*begin++ = mr;
 			}
 		}
 		write(audiofd, buf, BUF_LEN);
@@ -318,7 +321,7 @@ void I_StartupSound (void)
 
 	snd_SfxAvail = true;
 
-	if((audiopid = rfork(RFPROC|RFMEM)) == 0){
+	if(rfork(RFPROC|RFMEM) == 0){
 		audioproc();
 		exits(nil);
 	}
@@ -329,10 +332,6 @@ void I_ShutdownSound (void)
 {
 	snd_SfxAvail = false;
 
-	if(audiopid != -1){
-		postnote(PNPROC, audiopid, "shutdown");
-		audiopid = -1;
-	}
 	I_ShutdownMusic();
 }
 

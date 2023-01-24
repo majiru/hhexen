@@ -25,9 +25,6 @@ static void mouseproc(void);
 
 static uchar cmap[3*256];
 
-static int kbdpid = -1;
-static int mousepid = -1;
-
 static void
 catch(void *, char *msg)
 {
@@ -39,7 +36,6 @@ catch(void *, char *msg)
 
 void I_InitGraphics(void)
 {
-	int pid;
 
 	notify(catch);
 
@@ -51,31 +47,22 @@ void I_InitGraphics(void)
 	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
 	grabout = insetrect(screen->r, Dx(screen->r)/8);
 
-	if((pid = rfork(RFPROC|RFMEM)) == 0){
+	if(rfork(RFPROC|RFMEM) == 0){
 		kbdproc();
 		exits(nil);
 	}
-	kbdpid = pid;
 
-	if((pid = rfork(RFPROC|RFMEM)) == 0){
+	if(rfork(RFPROC|RFMEM) == 0){
 		mouseproc();
 		exits(nil);
 	}
-	mousepid = pid;
 
 	I_SetPalette ((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 
 void I_ShutdownGraphics(void)
 {
-	if(kbdpid != -1){
-		postnote(PNPROC, kbdpid, "shutdown");
-		kbdpid = -1;
-	}
-	if(mousepid != -1){
-		postnote(PNPROC, mousepid, "shutdown");
-		mousepid = -1;
-	}
+	closedisplay(display);
 }
 
 void I_SetPalette(byte *palette)
@@ -309,6 +296,7 @@ kbdproc(void)
 	buf2[0] = 0;
 	buf2[1] = 0;
 	buf[0] = 0;
+	procsetname("hexen kbdproc");
 	for(;;){
 		if(buf[0] != 0){
 			n = strlen(buf)+1;
@@ -380,6 +368,7 @@ mouseproc(void)
 	memset(&m, 0, sizeof m);
 	memset(&om, 0, sizeof om);
 	nerr = 0;
+	procsetname("hexen mouseproc");
 	for(;;){
 		n = read(fd, buf, sizeof buf);
 		if(n != 1+4*12){
