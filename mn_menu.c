@@ -15,6 +15,7 @@
 #include "p_local.h"
 #include "r_local.h"
 #include "i_cdmus.h"
+#include "i_video.h"
 #include "soundst.h"
 #include "v_compat.h"
 
@@ -2165,6 +2166,7 @@ void MN_ActivateMenu(void)
 	{
 		S_ResumeSound();
 	}
+	I_MouseEnable(0);
 	MenuActive = true;
 	FileMenuKeySteal = false;
 	MenuTime = 0;
@@ -2195,6 +2197,7 @@ void MN_DeactivateMenu(void)
 	}
 	S_StartSound(NULL, SFX_PLATFORM_STOP);
 	P_ClearMessage(&players[consoleplayer]);
+	I_MouseEnable(1);
 }
 
 //---------------------------------------------------------------------------
