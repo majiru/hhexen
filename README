@@ -1,3 +1,10 @@
-WIP port of HHexen to plan9.
+Plan9 port of Hexen.
 
-https://hhexen.sourceforge.net/hhexen.html
+WADs:
+	place 'hexen.wad' in $home/lib/hexen or /sys/games/lib/hexen
+
+Install:
+	mk install
+
+Upstream:
+	https://hhexen.sourceforge.net/hhexen.html
