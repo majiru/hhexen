@@ -220,16 +220,17 @@ void H2_Main(void)
 	W_InitMultipleFiles(wadloc);
 	W_CheckWADFiles();
 
-	strncpy(basedefault, wadloc[0], sizeof(basedefault)-5);
-	basedefault[sizeof(basedefault)-5] = '\0';
+	strcpy(basedefault, wadloc[0]);
 	slash = strrchr(basedefault, '/');
-	if (slash++ == 0)
-		slash = basedefault;
-	strcpy(slash, "cfg");
+	if (!slash)
+		basedefault[0] = '\0';
+	else
+		slash[1] = '\0';
+	basePath = basedefault;
 
 	// Load defaults before initing other systems
 	ST_Message("M_LoadDefaults: Load system defaults.\n");
-	M_LoadDefaults(basedefault);
+	M_LoadDefaults("cfg");
 
 	ST_Message("Z_Init: Init zone memory allocation daemon.\n");
 	Z_Init();
