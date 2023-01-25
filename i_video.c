@@ -25,6 +25,9 @@ static void mouseproc(void);
 
 static uchar cmap[3*256];
 
+static Image *backtile = nil;
+static uchar tiledata[4096*3];
+
 static void
 catch(void *, char *msg)
 {
@@ -34,15 +37,40 @@ catch(void *, char *msg)
 	noted(NDFLT);
 }
 
+static void I_UpdateTile(void)
+{
+	uchar *s, *d, *m;
+	uchar *e;
+
+	if(backtile == nil){
+		s = W_CacheLumpName("F_022", PU_CACHE);
+		d = tiledata;
+		e = s + 4096;
+		for(; s < e; s++){
+			m = &cmap[*s * 3];
+			*d++ = m[2];
+			*d++ = m[1];
+			*d++ = m[0];
+		}
+		backtile = allocimage(display, Rect(0, 0, 64, 64), RGB24, 1, DNofill);
+		loadimage(backtile, backtile->r, tiledata, sizeof tiledata);
+		if(backtile == nil)
+			sysfatal("allocimage: %r");
+	}
+	draw(screen, screen->r, backtile, nil, ZP);
+}
+
 void I_InitGraphics(void)
 {
 
 	notify(catch);
 
+	I_SetPalette ((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
+
 	if(initdraw(nil, nil, "hexen") < 0)
 		I_Error("I_InitGraphics failed");
 
-	draw(screen, screen->r, display->black, nil, ZP);
+	I_UpdateTile();
 
 	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
 	grabout = insetrect(screen->r, Dx(screen->r)/8);
@@ -56,8 +84,6 @@ void I_InitGraphics(void)
 		mouseproc();
 		exits(nil);
 	}
-
-	I_SetPalette ((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 
 void I_ShutdownGraphics(void)
@@ -99,9 +125,7 @@ void I_Update(void)
 		if(getwindow(display, Refnone) < 0)
 			sysfatal("getwindow: %r");
 
-		/* make black background */
-		draw(screen, screen->r, display->black, nil, ZP);
-
+		I_UpdateTile();
 		center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
 		grabout = insetrect(screen->r, Dx(screen->r)/8);
 	}
