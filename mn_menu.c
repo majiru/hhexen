@@ -2195,6 +2195,8 @@ void MN_DeactivateMenu(void)
 	{
 		paused = false;
 	}
+	SB_state = -1; //refresh the statbar
+	BorderNeedRefresh = true;
 	S_StartSound(NULL, SFX_PLATFORM_STOP);
 	P_ClearMessage(&players[consoleplayer]);
 	I_MouseEnable(1);
