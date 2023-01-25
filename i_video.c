@@ -282,75 +282,120 @@ runetokey(Rune r)
 	return 0;
 }
 
+static int
+keytorune(int key)
+{
+
+	switch(key){
+	case KEY_LEFTARROW:
+		return Kleft;
+	case KEY_RIGHTARROW:
+		return Kright;
+	case KEY_UPARROW:
+		return Kup;
+	case KEY_DOWNARROW:
+		return Kdown;
+
+	case KEY_RSHIFT:
+		return Kshift;
+	case KEY_RCTRL:
+		return Kctl;
+	case KEY_LALT:
+		return Kalt;
+
+	case KEY_BACKSPACE:
+		return Kbs;
+	case KEY_ENTER:
+		return '\n';
+	case KEY_PAUSE:
+		return Kprint;
+
+	case KEY_F1:
+	case KEY_F2:
+	case KEY_F3:
+	case KEY_F4:
+	case KEY_F5:
+	case KEY_F6:
+	case KEY_F7:
+	case KEY_F8:
+	case KEY_F9:
+	case KEY_F10:
+	case KEY_F11:
+	case KEY_F12:
+		return (KF|1)+(key-KEY_F1);
+
+	default:
+		if(key < 0x80)
+			return key;
+	}
+	return 0;
+}
+
 static void
 kbdproc(void)
 {
-	char buf[128], buf2[128], *s;
+	static char keys[MAXKEYS];
+	char buf[128], *s, *p;
 	int kfd, n;
 	Rune r;
 	event_t e;
+	int i;
 
 	if((kfd = open("/dev/kbd", OREAD)) < 0)
 		sysfatal("can't open kbd: %r");
 
-	buf2[0] = 0;
-	buf2[1] = 0;
 	buf[0] = 0;
+	memset(keys, 0, sizeof keys);
 	procsetname("hexen kbdproc");
 	for(;;){
-		if(buf[0] != 0){
-			n = strlen(buf)+1;
-			memmove(buf, buf+n, sizeof(buf)-n);
-		}
-		if(buf[0] == 0){
-			n = read(kfd, buf, sizeof(buf)-1);
-			if(n <= 0)
-				break;
-			buf[n-1] = 0;
-			buf[n] = 0;
-		}
+		n = read(kfd, buf, sizeof(buf)-1);
+		if(n <= 0)
+			break;
+		buf[n] = 0;
 
 		e.data1 = -1;
 		e.data2 = -1;
 		e.data3 = -1;
 
-		switch(buf[0]){
-		case 'c':
-			chartorune(&r, buf+1);
-			if(r){
-				e.data1 = r;
-				e.type = ev_char;
-				H2_PostEvent(&e);
-			}
-			/* no break */
-		default:
-			continue;
-		case 'k':
-			s = buf+1;
-			while(*s){
-				s += chartorune(&r, s);
-				if(utfrune(buf2+1, r) == nil){
-					if(e.data1 = runetokey(r)){
+		for(p = buf; p - buf < n; p += strlen(p)+1){
+			switch(*p){
+			case 'c':
+				chartorune(&r, p+1);
+				if(r){
+					e.data1 = r;
+					e.type = ev_char;
+					H2_PostEvent(&e);
+				}
+				/* no break */
+			default:
+				continue;
+			case 'k':
+				s = p+1;
+				while(*s){
+					s += chartorune(&r, s);
+					if((e.data1 = runetokey(r)) && keys[e.data1] == 0){
+						keys[e.data1] = 1;
 						e.type = ev_keydown;
 						H2_PostEvent(&e);
 					}
 				}
-			}
-			break;
-		case 'K':
-			s = buf2+1;
-			while(*s){
-				s += chartorune(&r, s);
-				if(utfrune(buf+1, r) == nil){
-					if(e.data1 = runetokey(r)){
+				break;
+			case 'K':
+				s = p+1;
+				for(i = 0; i < MAXKEYS; i++){
+					if(keys[i] == 0)
+						continue;
+					r = keytorune(i);
+					if(!utfrune(s, r)){
+						e.data1 = i;
+						keys[e.data1] = 0;
 						e.type = ev_keyup;
 						H2_PostEvent(&e);
 					}
 				}
+				break;
 			}
-			break;
 		}
-		strcpy(buf2, buf);
 	}
 }
 
