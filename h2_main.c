@@ -602,6 +602,8 @@ void H2_GameLoop(void)
 	}
 }
 
+QLock	eventlock;
+
 //==========================================================================
 //
 // H2_ProcessEvents
@@ -639,11 +641,23 @@ void H2_ProcessEvents(void)
 //
 //==========================================================================
 
-void H2_PostEvent(event_t *ev)
+void H2_PostEvent (event_t* ev)
 {
-	events[eventhead] = *ev;
-	eventhead++;
-	eventhead &= (MAXEVENTS - 1);
+    int next;
+
+retry:
+    qlock(&eventlock);
+    next = (eventhead+1)&(MAXEVENTS-1);
+    if(next == eventtail){
+        qunlock(&eventlock);
+        if(ev->type != ev_keydown && ev->type != ev_keyup)
+            return;
+        sleep(1);
+        goto retry;
+    }
+    events[eventhead] = *ev;
+    eventhead = next;
+    qunlock(&eventlock);
 }
 
 //==========================================================================
