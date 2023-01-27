@@ -102,7 +102,7 @@ static void CheatTrackFunc2(player_t *player, Cheat_t *cheat);
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
-extern byte *screen;
+extern byte *screens;
 extern int ArmorIncrement[NUMCLASSES][NUMARMOR];
 extern int AutoArmorSave[NUMCLASSES];
 
@@ -1432,18 +1432,19 @@ static void DrawMainBar(void)
 #ifndef RENDER3D
 		for (i = 165; i < 187 - (22*CPlayer->mana[0]) / MAX_MANA; i++)
 		{
-			screen[i*SCREENWIDTH+95] = 0;
-			screen[i*SCREENWIDTH+96] = 0;
-			screen[i*SCREENWIDTH+97] = 0;
+			screens[i*SCREENWIDTH+95] = 0;
+			screens[i*SCREENWIDTH+96] = 0;
+			screens[i*SCREENWIDTH+97] = 0;
 		}
 #endif
 		V_DrawPatch(102, 164, manaVialPatch2);
 #ifndef RENDER3D
+		//print("%d - %d\n", 165, 187-(22*CPlayer->mana[1])/MAX_MANA);
 		for (i = 165; i < 187-(22*CPlayer->mana[1])/MAX_MANA; i++)
 		{
-			screen[i*SCREENWIDTH+103] = 0;
-			screen[i*SCREENWIDTH+104] = 0;
-			screen[i*SCREENWIDTH+105] = 0;
+			screens[i*SCREENWIDTH+103] = 0;
+			screens[i*SCREENWIDTH+104] = 0;
+			screens[i*SCREENWIDTH+105] = 0;
 		}
 		oldweapon = CPlayer->readyweapon;
 		UpdateState |= I_STATBAR;
