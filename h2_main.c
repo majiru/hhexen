@@ -210,23 +210,9 @@ void H2_Main(void)
 	// heap has been previously allocated, so we need to initialize the
 	// WAD files BEFORE the zone memory initialization.
 	ST_Message("W_Init: Init WADfiles.\n");
-	for(i = 0; i < nelem(wadfiles); i++){
-		if(wadfiles[i] == nil){
-			wadloc[i] = nil;
-			break;
-		} else
-			wadloc[i] = I_IdentifyWAD(wadfiles[i]);
-	}
-	W_InitMultipleFiles(wadloc);
+	I_SetupPath(wadfiles);
+	W_InitMultipleFiles(wadfiles);
 	W_CheckWADFiles();
-
-	strcpy(basedefault, wadloc[0]);
-	slash = strrchr(basedefault, '/');
-	if (!slash)
-		basedefault[0] = '\0';
-	else
-		slash[1] = '\0';
-	basePath = basedefault;
 
 	// Load defaults before initing other systems
 	ST_Message("M_LoadDefaults: Load system defaults.\n");

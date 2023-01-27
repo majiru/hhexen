@@ -119,31 +119,38 @@ void I_CheckExternDriver (void)
 {
 }
 
-
-char* I_IdentifyWAD(char *wadname)
+static char* strip(char *s)
 {
-	static char path[1024];
+	char *p;
+
+	if(p = strstr(s, ".wad"))
+		*p = '\0';
+	if(p = strrchr(s, '/'))
+		return p;
+	return s;
+}
+
+static char bpd[512];
+static char wd[512];
+
+void I_SetupPath(char **wads)
+{
+	char **s;
 	char *home;
+	char *cfg, *data;
+	char buf[512];
 
-	snprint(path, sizeof path, wadname);
-	if (I_FileExists (path))
-		return path;
+	strcpy(buf, *wads);
+	snprint(wd, sizeof wd, "/sys/games/lib/%s/", strip(buf));
 
-	if(home = getenv("home")){
-		snprintf(path, sizeof path, "%s/lib/hexen/%s", home, wadname);
-		free(home);
+	for(s = wads; *s; s++)
+		cfg = *s;
 
-		if (I_FileExists (path))
-			return path;
-	}
+	strcpy(buf, cfg);
+	home = getenv("home");
+	snprint(bpd, sizeof bpd, "%s/lib/%s/", home, strip(buf));
+	free(home);
 
-	snprintf(path, sizeof path, "/sys/lib/hexen/%s", wadname);
-	if (I_FileExists (path))
-		return path;
-
-	snprintf(path, sizeof path, "/sys/games/lib/hexen/%s", wadname);
-	if (I_FileExists (path))
-		return path;
-
-	return nil;
+	basePath = bpd;
+	waddir = wd;
 }

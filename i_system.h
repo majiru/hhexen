@@ -99,7 +99,7 @@ void I_Close (int handle);
 int I_Seek(int handle, int n);
 int I_Read(int handle, void *buf, int n);
 
-char* I_IdentifyWAD(char *wadname);
+void I_SetupPath(char **wads);
 
 #endif
 //-----------------------------------------------------------------------------
