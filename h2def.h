@@ -11,6 +11,8 @@
 #ifndef __H2DEF__
 #define __H2DEF__
 
+#pragma pack on
+
 /* if rangecheck is undefined, most parameter
  * validation debugging code will not be compiled
  */
@@ -1689,6 +1691,8 @@ void V_DrawAltFuzzPatch(int x, int y, patch_t *patch);
 void V_DrawShadowedPatch(int x, int y, patch_t *patch);
 void V_BlitToScreen (int x, int y, byte *buffer, int width, int height);
 void V_DrawRawScreen(byte *raw);
+
+#pragma pack off
 
 #include "sounds.h"
 

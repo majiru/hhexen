@@ -42,6 +42,8 @@
 
 // TYPES -------------------------------------------------------------------
 
+
+#pragma pack on
 typedef struct
 {
 	char identification[4];
@@ -55,6 +57,7 @@ typedef struct
 	int size;
 	char name[8];
 } filelump_t;
+#pragma pack off
 
 // EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 

@@ -79,6 +79,8 @@ void P_InitFTAnims(void);
 void P_InitLightning(void);
 void P_ForceLightning(void);
 
+#pragma pack on
+
 
 /* ---- P_LIGHTS ---- */
 
@@ -460,8 +462,6 @@ typedef enum
 	ASTE_WAITINGFORSCRIPT,
 	ASTE_TERMINATING
 } aste_t;
-
-#pragma pack on
 
 typedef struct acs_s acs_t;
 typedef struct acsInfo_s acsInfo_t;

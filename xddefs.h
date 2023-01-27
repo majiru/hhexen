@@ -65,8 +65,6 @@ typedef struct
 	short		sidenum[2];	/* sidenum[1] will be -1 if one sided */
 } maplinedef_t;
 
-#pragma pack off
-
 #define	ML_BLOCKING		0x0001
 #define	ML_BLOCKMONSTERS	0x0002
 #define	ML_TWOSIDED		0x0004
@@ -88,9 +86,6 @@ typedef struct
 #define SPAC_IMPACT		3	/* when projectile hits line */
 #define SPAC_PUSH		4	/* when player/monster pushes line */
 #define SPAC_PCROSS		5	/* when projectile crosses line */
-
-
-#pragma pack on
 
 typedef	struct
 {
