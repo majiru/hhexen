@@ -100,18 +100,18 @@ boolean W_IsWadPresent(const char *filename)
 	if (waddir && *waddir)
 	{
 		snprintf (path, sizeof(path), "%s/%s", waddir, filename);
-		handle = open(path, OREAD);
+		handle = open(path, O_RDONLY|O_BINARY);
 	}
 #if !defined(_NO_USERDIRS)
 	if (handle == -1)	/* Try UserDIR */
 	{
 		snprintf (path, sizeof(path), "%s%s", basePath, filename);
-		handle = open(path, OREAD);
+		handle = open(path, O_RDONLY|O_BINARY);
 	}
 #endif	/* !_NO_USERDIRS */
 	if (handle == -1)	/* Now try CWD */
 	{
-		handle = open(filename, OREAD);
+		handle = open(filename, O_RDONLY|O_BINARY);
 	}
 	if (handle == -1)
 		return false;	/* Didn't find the file. */
@@ -147,25 +147,25 @@ void W_AddFile(const char *filename)
 	if (waddir && *waddir)
 	{
 		snprintf (path, sizeof(path), "%s/%s", waddir, filename);
-		handle = open(path, OREAD);
+		handle = open(path, O_RDONLY|O_BINARY);
 	}
 #if !defined(_NO_USERDIRS)
 	if (handle == -1)	/* Try UserDIR */
 	{
 		snprintf (path, sizeof(path), "%s%s", basePath, filename);
-		handle = open(path, OREAD);
+		handle = open(path, O_RDONLY|O_BINARY);
 	}
 #endif	/* !_NO_USERDIRS */
 	if (handle == -1)	/* Now try CWD */
 	{
-		handle = open(filename, OREAD);
+		handle = open(filename, O_RDONLY|O_BINARY);
 	}
 	if (handle == -1)
 		return;		/* Didn't find the file. */
 
 	flength = filelength(handle);
 	startlump = numlumps;
-	if (strcmp(filename + strlen(filename) - 3, "wad") != 0)
+	if (strcasecmp(filename + strlen(filename) - 3, "wad") != 0)
 	{ // Single lump file
 		fileinfo = &singleinfo;
 		freeFileInfo = NULL;
@@ -214,7 +214,7 @@ void W_AddFile(const char *filename)
 			I_Error("W_AddFile: fileinfo malloc failed\n");
 		}
 		freeFileInfo = fileinfo;
-		seek(handle, header.infotableofs, 0);
+		lseek(handle, header.infotableofs, SEEK_SET);
 		read(handle, fileinfo, length);
 		numlumps += header.numlumps;
 	}
@@ -304,8 +304,8 @@ void W_InitMultipleFiles(const char **filenames)
 
 static int IsMarker(const char *marker, const char *name)
 {
-	return !cistrncmp(name, marker, 8) ||
-		(*name == *marker && !cistrncmp(name + 1, marker, 7));
+	return !strncasecmp(name, marker, 8) ||
+		(*name == *marker && !strncasecmp(name + 1, marker, 7));
 }
 
 //==========================================================================
@@ -430,7 +430,7 @@ void W_OpenAuxiliary(const char *filename)
 	{
 		W_CloseAuxiliary();
 	}
-	if ((handle = open(filename, OREAD)) == -1)
+	if ((handle = open(filename, O_RDONLY|O_BINARY)) == -1)
 	{
 		I_Error("W_OpenAuxiliary: %s not found.", filename);
 		return;
@@ -449,7 +449,7 @@ void W_OpenAuxiliary(const char *filename)
 	header.infotableofs = LONG(header.infotableofs);
 	length = header.numlumps*sizeof(filelump_t);
 	fileinfo = (filelump_t *) Z_Malloc(length, PU_STATIC, NULL);
-	seek(handle, header.infotableofs, 0);
+	lseek(handle, header.infotableofs, SEEK_SET);
 	read(handle, fileinfo, length);
 	numlumps = header.numlumps;
 
@@ -651,7 +651,7 @@ void W_ReadLump(int lump, void *dest)
 	}
 	l = lumpinfo+lump;
 	//I_BeginRead();
-	seek(l->handle, l->position, 0);
+	lseek(l->handle, l->position, SEEK_SET);
 	c = read(l->handle, dest, l->size);
 	if (c < l->size)
 	{

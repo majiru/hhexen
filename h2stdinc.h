@@ -26,6 +26,14 @@
 
 #define size_t uvlong
 
+#define lseek seek
+#define SEEK_SET 0
+#define O_RDONLY OREAD
+#define O_BINARY 0
+
+#define strncasecmp cistrncmp
+#define strcasecmp cistrcmp
+
 #undef PI
 
 

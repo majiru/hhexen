@@ -381,12 +381,12 @@ void S_InitScript(void)
 	{
 		if (*sc_String == '$')
 		{
-			if (!cistrcmp(sc_String, "$ARCHIVEPATH"))
+			if (!strcasecmp(sc_String, "$ARCHIVEPATH"))
 			{
 				SC_MustGetString();
 				strcpy(ArchivePath, sc_String);
 			}
-			else if (!cistrcmp(sc_String, "$MAP"))
+			else if (!strcasecmp(sc_String, "$MAP"))
 			{
 				SC_MustGetNumber();
 				SC_MustGetString();
