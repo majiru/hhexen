@@ -187,9 +187,7 @@ void InitMapMusicInfo(void);
 
 void H2_Main(void)
 {
-	int p, i;
-	char *slash;
-	char *wadloc[nelem(wadfiles)];
+	int p;
 
 	M_FindResponseFile();
 	setbuf(stdout, NULL);
