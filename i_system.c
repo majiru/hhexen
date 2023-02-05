@@ -136,20 +136,32 @@ static char wd[512];
 void I_SetupPath(char **wads)
 {
 	char **s;
-	char *home;
+	char *tmp;
 	char *cfg, *data;
 	char buf[512];
 
-	strcpy(buf, *wads);
+	data = cfg = nil;
+	for(s = wads; *s; s++){
+		if(!strstr(*s, ".wad"))
+			continue;
+		if(data == nil)
+			data = *s;
+		cfg = *s;
+	}
+
+	strcpy(buf, data);
 	snprint(wd, sizeof wd, "/sys/games/lib/%s/", strip(buf));
 
-	for(s = wads; *s; s++)
-		cfg = *s;
-
 	strcpy(buf, cfg);
-	home = getenv("home");
-	snprint(bpd, sizeof bpd, "%s/lib/%s/", home, strip(buf));
-	free(home);
+	tmp = getenv("home");
+	snprint(bpd, sizeof bpd, "%s/lib/%s/", tmp, strip(buf));
+	free(tmp);
+
+	// would suck if someone only found out after 2 hours
+	// we could default back to cwd, but since this is our
+	// write location, I'd rather not take chances.
+	if(access(bpd, AEXIST) != 0)
+		sysfatal("user directory %s not available %r", bpd);
 
 	basePath = bpd;
 	waddir = wd;
