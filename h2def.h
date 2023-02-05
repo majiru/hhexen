@@ -11,8 +11,6 @@
 #ifndef __H2DEF__
 #define __H2DEF__
 
-#pragma pack on
-
 /* if rangecheck is undefined, most parameter
  * validation debugging code will not be compiled
  */
@@ -288,6 +286,8 @@ extern	byte	*destview, *destscreen;	/* PC direct to screen pointers */
 #define	ANG270		0xc0000000
 
 typedef unsigned angle_t;
+
+#pragma pack on
 
 typedef enum
 {

@@ -81,7 +81,6 @@ void P_ForceLightning(void);
 
 #pragma pack on
 
-
 /* ---- P_LIGHTS ---- */
 
 typedef enum
@@ -465,7 +464,6 @@ typedef enum
 
 typedef struct acs_s acs_t;
 typedef struct acsInfo_s acsInfo_t;
-
 
 struct acsInfo_s
 {

@@ -66,10 +66,7 @@ typedef struct
 	byte			special;
 	byte			args[5];
 } save_mobj_t;
-#if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
-/* make sure the struct is of 176 bytes size, so that all our
-   saved games are uniform. */
-#endif
+COMPILE_TIME_ASSERT(save_mobj_t, sizeof(save_mobj_t) == 176);
 
 typedef struct
 {
@@ -77,6 +74,8 @@ typedef struct
 	int		playerstate;			/* playerstate_t playerstate */
 	ticcmd_t	cmd;	/* note: sizeof(ticcmd_t) is
 				   10, not 4 byte aligned. */
+
+	char _pad[2];
 
 	int		playerclass;			/* pclass_t	playerclass */
 
@@ -125,12 +124,9 @@ typedef struct
 	unsigned int	jumpTics;
 	unsigned int	worldTimer;
 } save_player_t;
-#if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
-/* make sure the struct is of 648 bytes size, so that all our saved
-   games are uniform: Raven's DOS versions seem to have this struct
-   packed, with sizeof(player_t) == 646 and offsetof playerclass at
-   18 instead of 20. */
-#endif
+COMPILE_TIME_ASSERT(ticcmd_double_check, sizeof(ticcmd_t) == 10);
+COMPILE_TIME_ASSERT(save_player_1, sizeof(save_player_t) == 648);
+COMPILE_TIME_ASSERT(save_player_2, offsetof(save_player_t,playerclass) == 20);
 
 typedef struct
 {
@@ -141,6 +137,7 @@ typedef struct
 	int		direction;
 	int		newspecial;
 	short		texture;		/*  */
+	char		_pad[2];
 	fixed_t		floordestheight;
 	fixed_t		speed;
 	int		delayCount;
@@ -151,11 +148,10 @@ typedef struct
 	short		resetDelay;
 	short		resetDelayCount;
 	byte		textureChange;		/*  */
+	char 		_pad2[3];
 } save_floormove_t;
-#if !(defined(VERSION10_WAD) || defined(_DOSSAVE_COMPAT))
-/* make sure the struct is of 72 bytes size, so that all our saved
-   games are uniform. */
-#endif
+COMPILE_TIME_ASSERT(save_floormove_1, sizeof(save_floormove_t) == 72);
+COMPILE_TIME_ASSERT(save_floormove_2, offsetof(save_floormove_t,floordestheight) == 36);
 
 typedef struct
 {
