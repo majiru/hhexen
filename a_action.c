@@ -268,18 +268,12 @@ void A_LeafSpawn(mobj_t *actor)
 
 	for (i = (P_Random()&3)+1; i; i--)
 	{
-		//print("LEAF\n");
-		/* a = ((P_Random2())<<14);
-		b = ((P_Random2())<<14);
-		c = (P_Random()<<14); */
 
 		d = (P_Random()&1);
 		c = (P_Random()<<14);
 		b = ((P_Random2())<<14);
 		a = ((P_Random2())<<14);
 
-		//print("%d %d %d %d\n", a, b, c, d);
-		//print("%d %d %d\n", actor->x + a, actor->y + b, actor->z + c);
 		mo = P_SpawnMobj(actor->x + a,
 				 actor->y + b,
 				 actor->z + c,
@@ -1134,7 +1128,7 @@ void A_SoAExplode(mobj_t *actor)
 	mobj_t *mo;
 	int i;
 
-	int a, b, c, d;
+	int a, b, c;
 
 	mo = nil;
 	for (i = 0; i < 10; i++)
