@@ -1481,6 +1481,8 @@ int M_Random (void);
 /* returns a number from 0 to 255 */
 
 unsigned char P_Random(void);
+int P_Random2 (void);	/* P_Random() - P_Random() */
+int P_Random3 (void);	/* P_Random() - 128 */
 /* as M_Random, but used only by the play simulation */
 
 void M_ClearRandom (void);

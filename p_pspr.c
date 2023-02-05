@@ -898,12 +898,16 @@ void A_FSwordAttack2(mobj_t *actor)
 void A_FSwordFlames(mobj_t *actor)
 {
 	int i;
+	int a, b, c;
 
 	for (i = 1 + (P_Random() & 3); i; i--)
 	{
-		P_SpawnMobj(actor->x + ((P_Random() - 128) << 12),
-			    actor->y + ((P_Random() - 128) << 12),
-			    actor->z + ((P_Random() - 128) << 11),
+		c = ((P_Random3()) << 11);	
+		b = ((P_Random3()) << 12);
+		a = ((P_Random3()) << 12);
+		P_SpawnMobj(actor->x + a,
+			    actor->y + b,
+			    actor->z + c,
 			    MT_FSWORD_FLAME);
 	}
 }
@@ -1016,6 +1020,7 @@ void A_LightningZap(mobj_t *actor)
 {
 	mobj_t *mo;
 	fixed_t deltaZ;
+	int a, b;
 
 	A_LightningClip(actor);
 
@@ -1033,8 +1038,10 @@ void A_LightningZap(mobj_t *actor)
 	{
 		deltaZ = -10*FRACUNIT;
 	}
-	mo = P_SpawnMobj(actor->x + ((P_Random() - 128) * actor->radius/256),
-			 actor->y + ((P_Random() - 128) * actor->radius/256),
+	b = ((P_Random3()) * actor->radius/256);
+	a = ((P_Random3()) * actor->radius/256);
+	mo = P_SpawnMobj(actor->x + a,
+			 actor->y + b,
 			 actor->z + deltaZ, MT_LIGHTNING_ZAP);
 	if (mo)
 	{
@@ -1051,26 +1058,6 @@ void A_LightningZap(mobj_t *actor)
 			mo->momz = -20*FRACUNIT;
 		}
 	}
-	/*
-	mo = P_SpawnMobj(actor->x + ((P_Random() - 128) * actor->radius/256),
-			 actor->y + ((P_Random() - 128) * actor->radius/256),
-			 actor->z+deltaZ, MT_LIGHTNING_ZAP);
-	if (mo)
-	{
-		mo->special2 = (intptr_t)actor;
-		mo->momx = actor->momx;
-		mo->momy = actor->momy;
-		mo->target = actor->target;
-		if (actor->type == MT_LIGHTNING_FLOOR)
-		{
-			mo->momz = 16*FRACUNIT;
-		}
-		else
-		{
-			mo->momz = -16*FRACUNIT;
-		}
-	}
-	*/
 	if (actor->type == MT_LIGHTNING_FLOOR && P_Random() < 160)
 	{
 		S_StartSound(actor, SFX_MAGE_LIGHTNING_CONTINUOUS);
@@ -1420,7 +1407,8 @@ void A_FAxeAttack(player_t *player, pspdef_t*)
 	int i;
 	int useMana;
 
-	damage = 40 + (P_Random() & 15) + (P_Random() & 7);
+	damage = 40 + (P_Random() & 15);
+	damage += (P_Random() & 7);
 	power = 0;
 	if (player->mana[MANA_1] > 0)
 	{
@@ -1885,6 +1873,7 @@ void A_CHolyAttack2(mobj_t *actor)
 	int i;
 	mobj_t *mo;
 	mobj_t *tail, *next;
+	int a, b;
 
 	for (j = 0; j < 4; j++)
 	{
@@ -1905,7 +1894,9 @@ void A_CHolyAttack2(mobj_t *actor)
 			mo->special2 = (32 + (P_Random() & 7)) << 16;	// lower-left
 			break;
 		case 3:
-			mo->special2 = ((32 + (P_Random() & 7)) << 16) + 32 + (P_Random() & 7);
+			a = ((32 + (P_Random() & 7)) << 16);
+			b = 32 + (P_Random() & 7);
+			mo->special2 = a + b;
 			break;
 		}
 		mo->z = actor->z;
