@@ -517,7 +517,8 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
 	angle_t an;
 	fixed_t dist;
 
-	if (!netgame && players[0].health <= 0)
+	player = players;
+	if (!netgame && player->health <= 0)
 	{ // Single player game and player is dead, look for monsters
 		return(P_LookForMonsters(actor));
 	}
@@ -918,7 +919,9 @@ static boolean P_UpdateMorphedMonster(mobj_t *actor, int tics)
 		mo->angle = oldMonster.angle;
 		mo->flags = oldMonster.flags;
 		mo->health = oldMonster.health;
-		mo->target = oldMonster.target;
+		//arm64 allignment
+		//mo->target = oldMonster.target;
+		memcpy(&mo->target, &oldMonster.target, sizeof mo->target);
 		mo->special = oldMonster.special;
 		mo->special1 = 5*35; // Next try in 5 seconds
 		mo->special2 = moType;
@@ -928,7 +931,9 @@ static boolean P_UpdateMorphedMonster(mobj_t *actor, int tics)
 		return false;
 	}
 	mo->angle = oldMonster.angle;
-	mo->target = oldMonster.target;
+	//arm64 allignment
+	//mo->target = oldMonster.target;
+	memcpy(&mo->target, &oldMonster.target, sizeof mo->target);
 	mo->tid = oldMonster.tid;
 	mo->special = oldMonster.special;
 	memcpy(mo->args, oldMonster.args, 5);

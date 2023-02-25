@@ -1671,7 +1671,9 @@ static boolean P_MorphMonster(mobj_t *actor)
 	monster->special2 = moType;
 	monster->special1 = MORPHTICS + P_Random();
 	monster->flags |= (oldMonster.flags & MF_SHADOW);
-	monster->target = oldMonster.target;
+	//monster->target = oldMonster.target;
+	//arm64 allignment
+	memcpy(&monster->target, &oldMonster.target, sizeof monster->target);
 	monster->angle = oldMonster.angle;
 	monster->tid = oldMonster.tid;
 	monster->special = oldMonster.special;
